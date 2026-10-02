@@ -19,7 +19,7 @@ import android.webkit.WebViewClient;
 public class MainActivity extends Activity {
 
     // Where the games live online (the "web" folder, published by GitHub).
-    static final String GAMES_URL = "https://YOUR-GITHUB-NAME.github.io/games/index.html";
+    static final String GAMES_URL = "https://trey120234.github.io/family-games/index.html";
 
     // Shown only if there's no internet AND no saved copy yet (first launch offline).
     static final String OFFLINE_PAGE = "file:///android_asset/offline.html?retry=";

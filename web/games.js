@@ -8,7 +8,7 @@
 // =============================================================
 
 // Name shown at the top of the home screen.
-const COLLECTION_TITLE = "Games";
+const COLLECTION_TITLE = "Games Test";
 
 const GAMES = [
   {
