@@ -1,0 +1,211 @@
+/* =============================================================
+   Shared screen parts used by every game:
+   top bar, house button, streak box, buttons, message line,
+   and the pop-up panels (How to play, Give up, Game over).
+   Each game's own style.css adds its board on top of this.
+   ============================================================= */
+
+.app {
+  height: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding-inline: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Top bar ---------- */
+header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-block: 10px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Little house button that goes back to the list of games */
+.home-btn {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.6rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Narrow phones: shrink the title a little so everything fits on one line */
+@media (max-width: 360px) {
+  h1 { font-size: 1.35rem; }
+}
+
+/* Win streak: big number with a small label underneath */
+.streak {
+  min-width: 76px;
+  padding: 4px 12px;
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.streak-num {
+  font: 700 1.5rem var(--body);
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.streak-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Three equal buttons across the width */
+.header-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hbtn {
+  min-height: 48px;
+  padding: 8px 6px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--fg);
+  font: 700 1rem var(--body);
+  cursor: pointer;
+}
+
+/* Visible outline when moving around with a keyboard */
+.home-btn:focus-visible,
+.hbtn:focus-visible,
+.big:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Message line ---------- */
+.msg {
+  min-height: 2.2em;
+  padding-block: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* ---------- Pop-up panels ---------- */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(20, 30, 24, 0.45);
+}
+
+.panel {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90%;
+  overflow: auto;
+  padding: 22px 20px 22px;
+  border-radius: 20px 20px 0 0;
+  background: var(--surface);
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.7rem;
+}
+
+.panel p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+/* Played / Won / Streak numbers on the game-over panel */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.stats b { display: block; font-size: 2rem; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 0.9rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Big full-width buttons in the panels */
+.big {
+  min-height: 60px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--on-tile);
+  font: 700 1.3rem var(--body);
+  cursor: pointer;
+}
+
+/* Second-choice button, like "Keep playing" */
+.big.alt {
+  background: var(--key);
+  color: var(--key-fg);
+}
+
+/* ---------- Animations shared by games ---------- */
+@keyframes pop {
+  50% { transform: scale(1.08); }
+}
+@keyframes shake {
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+@media (max-height: 640px) {
+  .msg { min-height: 1.6em; }
+}

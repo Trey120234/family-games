@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Games</title>
+  <!-- Shared fonts and colors first, then the home screen's own styles -->
+  <link rel="stylesheet" href="shared/theme.css">
+  <link rel="stylesheet" href="home.css">
+</head>
+<body>
+
+  <!-- Home screen: the title and one big card per game -->
+  <main class="home">
+    <header class="home-header">
+      <h1 id="collectionTitle">Games</h1>
+    </header>
+
+    <!-- The game cards are built by home.js from the list in games.js -->
+    <div class="game-list" id="gameList"></div>
+  </main>
+
+  <!-- games.js must load before home.js -->
+  <script src="games.js"></script>
+  <script src="home.js"></script>
+  <!-- Keeps a copy on the phone for offline play and picks up updates -->
+  <script src="shared/offline.js"></script>
+</body>
+</html>

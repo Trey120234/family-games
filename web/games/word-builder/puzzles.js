@@ -1,0 +1,77 @@
+// =============================================================
+//  Word Builder - the puzzles.
+//
+//  Each line is one puzzle, in this order:
+//    the 7-letter word, the 6-letter word, two 5-letter words,
+//    then three 4-letter words.
+//  The letters she gets are the letters of the 7-letter word,
+//  so every other word must be spelled from those same letters.
+//
+//  To add a puzzle, copy a line and change the words. If a word
+//  can't be made from the 7 letters (or is the wrong length),
+//  the game quietly skips that puzzle, so a typo can't break it.
+//  Puzzles are played in the order listed here.
+// =============================================================
+
+const PUZZLES = [
+  ["through",  "though",  "rough", "tough",  "hour", "hurt", "tour"],
+  ["another",  "throne",  "north", "other",  "near", "than", "then"],
+  ["nothing",  "noting",  "night", "thing",  "hint", "into", "thin"],
+  ["country",  "county",  "count", "court",  "corn", "turn", "your"],
+  ["started",  "stated",  "start", "state",  "date", "read", "rest"],
+  ["several",  "reveal",  "leave", "serve",  "else", "ever", "real"],
+  ["playing",  "paying",  "lying", "plain",  "pain", "plan", "play"],
+  ["talking",  "taking",  "align", "giant",  "king", "link", "talk"],
+  ["include",  "induce",  "lined", "uncle",  "lied", "line", "nice"],
+  ["certain",  "retain",  "trace", "train",  "care", "race", "rate"],
+  ["medical",  "mailed",  "claim", "media",  "came", "idea", "made"],
+  ["brought",  "bought",  "ought", "turbo",  "both", "bout", "hurt"],
+  ["provide",  "period",  "drive", "video",  "drop", "over", "ride"],
+  ["reading",  "garden",  "grand", "range",  "dear", "gain", "ring"],
+  ["federal",  "leader",  "elder", "freed",  "deal", "feel", "free"],
+  ["central",  "rental",  "clear", "later",  "cent", "late", "rent"],
+  ["related",  "relate",  "alert", "trade",  "lead", "tear", "tree"],
+  ["article",  "retail",  "trail", "trial",  "rail", "rice", "tail"],
+  ["foreign",  "region",  "grief", "reign",  "fine", "fire", "gone"],
+  ["version",  "senior",  "noise", "risen",  "ones", "rise", "rose"],
+  ["created",  "create",  "acted", "rated",  "card", "dare", "deer"],
+  ["percent",  "center",  "creep", "enter",  "peer", "teen", "tree"],
+  ["married",  "admire",  "armed", "dream",  "raid", "rare", "rear"],
+  ["officer",  "office",  "force", "offer",  "core", "fire", "rice"],
+  ["respect",  "secret",  "reset", "steep",  "pest", "pets", "step"],
+  ["western",  "newest",  "sweet", "tense",  "seen", "went", "were"],
+  ["leading",  "gained",  "angel", "ideal",  "glad", "land", "lane"],
+  ["section",  "notice",  "since", "stone",  "cost", "once", "site"],
+  ["manager",  "manage",  "anger", "arena",  "game", "mean", "name"],
+  ["regular",  "larger",  "large", "rural",  "gear", "rule", "urge"],
+  ["clearly",  "really",  "early", "layer",  "call", "cell", "year"],
+  ["greater",  "regret",  "agree", "great",  "gate", "rage", "rate"],
+  ["driving",  "riding",  "grind", "rigid",  "ding", "grid", "ring"],
+  ["machine",  "cinema",  "chain", "niche",  "each", "main", "mine"],
+  ["reality",  "retail",  "alter", "relay",  "rely", "tale", "tier"],
+  ["explain",  "alpine",  "panel", "plane",  "lean", "nail", "pile"],
+  ["purpose",  "supper",  "super", "upper",  "pure", "sure", "user"],
+  ["teacher",  "heater",  "there", "three",  "hear", "heat", "here"],
+  ["weather",  "heater",  "water", "where",  "hate", "wear", "what"],
+  ["highest",  "height",  "eight", "sight",  "high", "hits", "this"],
+  ["located",  "locate",  "dealt", "delta",  "code", "cold", "told"],
+  ["wearing",  "regain",  "grain", "range",  "grew", "rain", "wing"],
+  ["reached",  "header",  "heard", "reach",  "arch", "hard", "head"],
+  ["learned",  "earned",  "elder", "learn",  "earn", "lend", "need"],
+  ["stopped",  "posted",  "depot", "posed",  "does", "post", "stop"],
+  ["hearing",  "regain",  "anger", "grain",  "hair", "hang", "hire"],
+  ["trouble",  "butler",  "outer", "route",  "blue", "role", "true"],
+  ["removed",  "remove",  "drove", "moved",  "mode", "more", "move"],
+  ["arrived",  "driver",  "rider", "river",  "aide", "dire", "dive"],
+  ["produce",  "poured",  "crude", "proud",  "crop", "cure", "rude"],
+  ["eastern",  "senate",  "eaten", "stare",  "east", "sent", "star"],
+  ["neither",  "either",  "their", "there",  "heir", "thee", "tire"],
+  ["managed",  "damage",  "amend", "named",  "aged", "amen", "dame"],
+  ["knowing",  "owning",  "known", "owing",  "gown", "king", "know"],
+  ["nuclear",  "neural",  "clean", "cruel",  "acre", "clan", "clue"],
+  ["entered",  "tender",  "enter", "trend",  "dent", "need", "tend"],
+  ["promise",  "impose",  "prime", "prose",  "poem", "pose", "some"],
+  ["supreme",  "resume",  "purse", "serum",  "mere", "seem", "spur"],
+  ["measure",  "resume",  "erase", "serum",  "arms", "ears", "same"],
+  ["kitchen",  "ethnic",  "thick", "think",  "inch", "neck", "nick"],
+];

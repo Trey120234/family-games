@@ -1,0 +1,120 @@
+/* =============================================================
+   Word Garden - styles for this game only.
+   Fonts and colors come from ../../shared/theme.css.
+   The top bar, buttons and panels come from ../../shared/ui.css.
+   ============================================================= */
+
+/* ---------- Letter grid ---------- */
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board {
+  height: 100%;
+  max-height: 420px;
+  max-width: 100%;
+  aspect-ratio: 5 / 6;
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 7px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  font: 700 clamp(1.6rem, 8vw, 2.4rem) var(--body);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.tile.filled { border-color: var(--muted); animation: pop 0.12s ease-out; }
+.tile.green  { background: var(--green); border-color: var(--green); color: var(--on-tile); }
+.tile.gold   { background: var(--gold);  border-color: var(--gold);  color: var(--on-tile); }
+.tile.gray   { background: var(--gray);  border-color: var(--gray);  color: var(--on-tile); }
+
+.row.shake { animation: shake 0.4s; }
+
+/* ---------- On-screen keyboard ---------- */
+.kb {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-block: 8px 12px;
+}
+
+.krow {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.k {
+  flex: 1;
+  min-width: 0;
+  height: 60px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--key);
+  color: var(--key-fg);
+  font: 700 1.35rem var(--body);
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.k.wide { flex: 1.6; font-size: 0.95rem; }
+.k.del  { font-size: 1.6rem; }
+.k:active { filter: brightness(0.88); }
+
+.k:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.k.green { background: var(--green); color: var(--on-tile); }
+.k.gold  { background: var(--gold);  color: var(--on-tile); }
+.k.gray  { background: var(--gray);  color: var(--on-tile); }
+
+/* ---------- "How to play" panel pieces ---------- */
+.legend { display: grid; gap: 10px; }
+.legend div { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; }
+
+.swatch { width: 30px; height: 30px; flex: none; border-radius: 6px; }
+.swatch.green { background: var(--green); }
+.swatch.gold  { background: var(--gold); }
+.swatch.gray  { background: var(--gray); }
+
+.example { display: flex; gap: 6px; }
+.example .tile { width: 46px; height: 46px; font-size: 1.5rem; }
+
+/* The secret word on the game-over panel */
+.answer {
+  font: 700 2rem var(--body);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ---------- Small screens and reduced motion ---------- */
+@media (max-height: 640px) {
+  .k { height: 50px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile.filled, .row.shake { animation: none; }
+}

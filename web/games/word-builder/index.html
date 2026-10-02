@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Word Builder</title>
+  <!-- Shared fonts and colors, then shared screen parts, then this game's own styles -->
+  <link rel="stylesheet" href="../../shared/theme.css">
+  <link rel="stylesheet" href="../../shared/ui.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Main game screen -->
+  <div class="app">
+    <header>
+      <!-- Top line: home button and game name on the left, win streak on the right -->
+      <div class="title-row">
+        <div class="title-left">
+          <button class="home-btn" id="homeBtn" type="button" aria-label="All games">
+            <!-- little house drawing -->
+            <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+              <path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5.5 10v9.5h5v-5.5h3v5.5h5V10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <h1>Word Builder</h1>
+        </div>
+        <div class="streak" aria-live="polite">
+          <span class="streak-num" id="streakNum">0</span>
+          <span class="streak-label">in a row</span>
+        </div>
+      </div>
+
+      <!-- Second line: the three buttons -->
+      <div class="header-buttons">
+        <button class="hbtn" id="hintBtn" type="button">Hint</button>
+        <button class="hbtn" id="giveUpBtn" type="button">Give up</button>
+        <button class="hbtn" id="helpBtn" type="button" aria-label="How to play">Help</button>
+      </div>
+    </header>
+
+    <!-- Message line under the title -->
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+
+    <!-- The rows of boxes for the hidden words are built by game.js -->
+    <div class="board-wrap">
+      <div class="board" id="board" aria-label="Hidden words"></div>
+    </div>
+
+    <!-- The word she is spelling right now -->
+    <div class="entry" id="entry" aria-live="polite"></div>
+
+    <!-- The 7 letters to choose from (built by game.js) -->
+    <div class="letters" id="letters"></div>
+
+    <!-- Mix / Delete / Enter -->
+    <div class="controls">
+      <button class="ctrl" id="mixBtn" type="button">Mix</button>
+      <button class="ctrl" id="deleteBtn" type="button" aria-label="Delete letter">⌫</button>
+      <button class="ctrl enter" id="enterBtn" type="button">Enter</button>
+    </div>
+  </div>
+
+  <!-- "How to play" panel -->
+  <div class="sheet" id="helpSheet" hidden>
+    <div class="panel" role="dialog" aria-labelledby="helpTitle">
+      <h2 id="helpTitle">How to play</h2>
+      <p>There are 7 hidden words: three with 4 letters, two with 5, one with 6, and one with 7.</p>
+      <p>Spell them using the letters at the bottom. Tap the letters in order, then tap <b>Enter</b>. Each letter can be used once per word.</p>
+      <p>Found words fill in <b>green</b>. Find all 7 to finish the puzzle.</p>
+      <p>Tap <b>Mix</b> to shuffle the letters, or <b>Hint</b> to show one letter.</p>
+      <button class="big" id="helpClose" type="button">Let's play</button>
+    </div>
+  </div>
+
+  <!-- "Give up?" panel - asks first, so a stray tap doesn't end the puzzle -->
+  <div class="sheet" id="giveUpSheet" hidden>
+    <div class="panel" role="dialog" aria-labelledby="giveUpTitle">
+      <h2 id="giveUpTitle">Give up on this puzzle?</h2>
+      <p id="giveUpText"></p>
+      <button class="big" id="giveUpYes" type="button">Show me the words</button>
+      <button class="big alt" id="giveUpNo" type="button">Keep playing</button>
+    </div>
+  </div>
+
+  <!-- "Puzzle over" panel -->
+  <div class="sheet" id="endSheet" hidden>
+    <div class="panel" role="dialog" aria-labelledby="endTitle">
+      <h2 id="endTitle">Puzzle solved!</h2>
+      <p id="endText"></p>
+      <p class="missed-words" id="endWords"></p>
+      <div class="stats">
+        <div><b id="sPlayed">0</b><span>Played</span></div>
+        <div><b id="sWon">0</b><span>Solved</span></div>
+        <div><b id="sStreak">0</b><span>Streak</span></div>
+      </div>
+      <button class="big" id="nextBtn" type="button">Next puzzle</button>
+    </div>
+  </div>
+
+  <!-- puzzles.js must load before game.js -->
+  <script src="puzzles.js"></script>
+  <script src="game.js"></script>
+  <!-- Keeps a copy on the phone for offline play and picks up updates -->
+  <script src="../../shared/offline.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+# =============================================================
+#  Publishes the "web" folder as the games website (GitHub Pages)
+#  every time a change is uploaded. Runs on GitHub, not on your PC.
+#  It also writes files.json - the list the offline helper (sw.js)
+#  uses to keep a copy of every game on the phone.
+# =============================================================
+
+name: Publish games
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**"]
+  workflow_dispatch:     # lets you run it by hand from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: List the game files for offline use
+        working-directory: web
+        run: |
+          find . -type f ! -name files.json ! -name sw.js | sed 's|^\./||' | sort \
+            | jq -R . | jq -s --arg v "$GITHUB_SHA" '{version: $v, files: (["./"] + .)}' > files.json
+          cat files.json
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

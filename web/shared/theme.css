@@ -1,0 +1,80 @@
+/* =============================================================
+   Shared look for every game: fonts, colors, and page basics.
+   Each game's own style.css adds its specific layout on top.
+   Change a color here and every game follows.
+   ============================================================= */
+
+/* ---------- Fonts (stored in the fonts folder, so it works offline) ---------- */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-weight: 400;
+  src: url(fonts/ah-400.woff2) format("woff2");
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-weight: 700;
+  src: url(fonts/ah-700.woff2) format("woff2");
+}
+@font-face {
+  font-family: "Young Serif";
+  font-weight: 400;
+  src: url(fonts/ys-400.woff2) format("woff2");
+}
+
+/* ---------- Colors and fonts ---------- */
+:root {
+  --bg: #eef3ee;        /* page background */
+  --surface: #ffffff;   /* empty tiles, panels */
+  --fg: #1f2a24;        /* main text */
+  --muted: #5d6b63;     /* secondary text */
+  --line: #c9d4cc;      /* borders */
+  --key: #d9e2db;       /* keyboard keys */
+  --key-fg: #1f2a24;
+  --green: #2f7d4f;     /* right letter, right spot */
+  --gold: #c99a1c;      /* right letter, wrong spot */
+  --gray: #7b857f;      /* letter not in the word */
+  --on-tile: #ffffff;   /* text on colored tiles */
+  --accent: #2f7d4f;    /* title and main buttons */
+
+  --display: "Young Serif", Georgia, "Times New Roman", serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Dark mode colors (used when the phone is set to dark mode) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141a16;
+    --surface: #1e2621;
+    --fg: #eef3ee;
+    --muted: #a3b1a8;
+    --line: #3a4740;
+    --key: #36443c;
+    --key-fg: #eef3ee;
+    --green: #3d9a63;
+    --gold: #d6a92a;
+    --gray: #59625d;
+    --accent: #5cb882;
+    color-scheme: dark;
+  }
+}
+
+/* ---------- Page ---------- */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 18px;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}

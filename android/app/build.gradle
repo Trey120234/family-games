@@ -1,0 +1,57 @@
+plugins {
+    id "com.android.application"
+}
+
+// The signing key lives in ../../signing (kept out of GitHub).
+// The SAME key must sign every version, or phones refuse the update.
+def signingProps = new Properties()
+def signingFile = rootProject.file("../signing/keystore.properties")
+if (signingFile.exists()) {
+    signingFile.withInputStream { signingProps.load(it) }
+}
+
+android {
+    namespace "com.familygames.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.familygames.app"   // never change this once installed, or it becomes a different app
+        minSdk 24
+        targetSdk 34
+
+        // Raise versionCode by 1 for every update you send out.
+        versionCode 3
+        versionName "2.0"
+    }
+
+    signingConfigs {
+        games {
+            if (signingFile.exists()) {
+                storeFile rootProject.file("../signing/" + signingProps["storeFile"])
+                storePassword signingProps["storePassword"]
+                keyAlias signingProps["keyAlias"]
+                keyPassword signingProps["keyPassword"]
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            // Use the real key for test builds too, so they install over the real app.
+            signingConfig signingConfigs.games
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.games
+        }
+    }
+
+    // The games themselves are downloaded from the games website (see
+    // MainActivity.java), so the app only carries the small "Almost ready"
+    // page in app/src/main/assets.
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

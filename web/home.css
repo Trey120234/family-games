@@ -1,0 +1,123 @@
+/* =============================================================
+   Home screen styles.
+   Fonts and colors come from shared/theme.css.
+   ============================================================= */
+
+.home {
+  min-height: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ---------- Title ---------- */
+.home-header {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.home-header h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 2.3rem;
+  line-height: 1.15;
+  color: var(--accent);
+  text-wrap: balance;
+}
+
+/* ---------- Game cards ---------- */
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.game-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--fg);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-card:active {
+  transform: scale(0.98);
+  border-color: var(--accent);
+}
+
+.game-card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.game-icon {
+  width: 76px;
+  height: 76px;
+  flex: none;
+  border-radius: 16px;
+}
+
+.game-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.game-name {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--fg);
+}
+
+.game-description {
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.game-status {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border: 2px solid var(--gold);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.game-arrow {
+  flex: none;
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--accent);
+}
+
+/* Dashed box under the list */
+.coming-soon {
+  padding: 18px;
+  border: 2px dashed var(--line);
+  border-radius: 18px;
+  text-align: center;
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card:active { transform: none; }
+}

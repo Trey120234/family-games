@@ -1,0 +1,170 @@
+/* =============================================================
+   Word Builder - styles for this game only.
+   Fonts and colors come from ../../shared/theme.css.
+   The top bar, buttons and panels come from ../../shared/ui.css.
+   ============================================================= */
+
+/* Size of one box in the hidden-word rows. It shrinks on smaller
+   screens so all 7 rows, the letters and the buttons fit. */
+:root {
+  --box: clamp(30px, min(calc((100vw - 64px) / 7), calc((100vh - 470px) / 7.8)), 50px);
+}
+
+/* ---------- Hidden word rows ---------- */
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.word-row {
+  display: flex;
+  gap: 5px;
+}
+
+.box {
+  width: var(--box);
+  height: var(--box);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  font: 700 calc(var(--box) * 0.56) var(--body);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+/* Found word */
+.box.found  { background: var(--green); border-color: var(--green); color: var(--on-tile); }
+/* Letter shown by the Hint button */
+.box.hinted { border-color: var(--gold); color: var(--fg); }
+/* Word she didn't find (after giving up) */
+.box.missed { background: var(--gray); border-color: var(--gray); color: var(--on-tile); }
+
+/* Little bounce when a word is found */
+.word-row.just .box { animation: pop 0.25s ease-out; }
+
+/* ---------- The word being spelled ---------- */
+.entry {
+  min-height: 58px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.entry-letter {
+  width: 44px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 4px solid var(--accent);
+  font: 700 2rem var(--body);
+  text-transform: uppercase;
+}
+
+.entry-hint {
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+
+.entry.shake { animation: shake 0.4s; }
+
+/* ---------- The 7 letters ---------- */
+.letters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding-block: 8px;
+}
+
+.letter {
+  width: calc((100% - 24px) / 4);
+  height: 60px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--fg);
+  font: 700 2rem var(--body);
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.letter:active { filter: brightness(0.9); }
+
+/* A letter already used in the word being spelled */
+.letter.used {
+  background: var(--key);
+  color: var(--muted);
+  border-color: var(--key);
+  opacity: 0.45;
+}
+
+/* ---------- Mix / Delete / Enter ---------- */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 8px;
+  padding-block: 4px 12px;
+}
+
+.ctrl {
+  min-height: 56px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--key);
+  color: var(--key-fg);
+  font: 700 1.15rem var(--body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#deleteBtn { font-size: 1.6rem; }
+
+.ctrl.enter {
+  background: var(--accent);
+  color: var(--on-tile);
+}
+
+.ctrl:active { filter: brightness(0.9); }
+
+.letter:focus-visible,
+.ctrl:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Words she missed, listed on the "puzzle over" panel */
+.missed-words {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ---------- Small screens and reduced motion ---------- */
+@media (max-height: 700px) {
+  .letter { height: 52px; font-size: 1.7rem; }
+  .ctrl { min-height: 48px; }
+  .entry { min-height: 48px; }
+  .entry-letter { height: 44px; font-size: 1.7rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-row.just .box, .entry.shake { animation: none; }
+}

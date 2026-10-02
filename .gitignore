@@ -1,0 +1,11 @@
+# Never upload the signing key - keep it private and backed up.
+signing/
+
+# Build output (Android Studio recreates these)
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.apk
+*.aab
