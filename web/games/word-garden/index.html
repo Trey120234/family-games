@@ -11,6 +11,17 @@
 </head>
 <body>
 
+  <!-- Drawing pieces shared by every flower (the soft glow behind it) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <radialGradient id="bloomGlow">
+        <stop offset="0" stop-color="var(--glow)" stop-opacity="0.95"/>
+        <stop offset="0.55" stop-color="var(--glow)" stop-opacity="0.45"/>
+        <stop offset="1" stop-color="var(--glow)" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
   <!-- Main game screen -->
   <div class="app">
     <header>
@@ -40,15 +51,35 @@
       </div>
     </header>
 
-    <!-- Message line under the title -->
-    <div class="msg" id="msg" role="status" aria-live="polite">Guess the 5-letter word</div>
-
-    <!-- The 6 x 5 letter grid is built by game.js -->
-    <div class="board-wrap">
-      <div class="board" id="board" aria-label="Guesses"></div>
+    <!-- How many letters, and which try she's on -->
+    <div class="len-row">
+      <span class="len-label" id="lenLabel">Letters</span>
+      <div class="seg" id="lenPick" role="group" aria-labelledby="lenLabel">
+        <button type="button" data-v="4" aria-pressed="false">4</button>
+        <button type="button" data-v="5" aria-pressed="true">5</button>
+        <button type="button" data-v="6" aria-pressed="false">6</button>
+        <button type="button" data-v="mix" aria-pressed="false">Mix</button>
+      </div>
+      <span class="tries" id="tries">Try 1 of 6</span>
     </div>
 
-    <!-- The on-screen keyboard is built by game.js -->
+    <!-- Little key explaining the three plants -->
+    <div class="legend" aria-label="What the plants mean">
+      <span><i class="l-bloom"></i>Right spot</span>
+      <span><i class="l-part"></i>Wrong spot</span>
+      <span><i class="l-out"></i>Not in word</span>
+    </div>
+
+    <!-- Message line -->
+    <div class="msg" id="msg" role="status" aria-live="polite">Plant a word to see what grows</div>
+
+    <!-- The pots for the word being typed (built by game.js) -->
+    <div class="bed" id="bed" aria-label="Your guess"></div>
+
+    <!-- Earlier guesses, newest at the top (built by game.js) -->
+    <div class="history" id="history" aria-label="Earlier guesses"></div>
+
+    <!-- The on-screen keyboard (built by game.js) -->
     <div class="kb" id="kb"></div>
   </div>
 
@@ -56,19 +87,13 @@
   <div class="sheet" id="helpSheet" hidden>
     <div class="panel" role="dialog" aria-labelledby="helpTitle">
       <h2 id="helpTitle">How to play</h2>
-      <p>Find the hidden 5-letter word. You get 6 tries. Tap letters, then tap <b>ENTER</b>.</p>
-      <p>After each try, the squares change color:</p>
-      <div class="legend">
-        <div><span class="swatch green"></span><span><b>Green</b> — right letter, right spot</span></div>
-        <div><span class="swatch gold"></span><span><b>Yellow</b> — in the word, wrong spot</span></div>
-        <div><span class="swatch gray"></span><span><b>Gray</b> — not in the word</span></div>
-      </div>
-      <div class="example" aria-hidden="true">
-        <div class="tile green">P</div>
-        <div class="tile gold">L</div>
-        <div class="tile gray">A</div>
-        <div class="tile gray">N</div>
-        <div class="tile gray">T</div>
+      <p>Grow the hidden word. Type a word into the pots, then tap <b>Enter</b>.</p>
+      <p>Pick <b>4</b>, <b>5</b> or <b>6</b> letters, or <b>Mix</b> for a surprise. Longer words get more tries.</p>
+      <p>After each try, something grows in every pot:</p>
+      <div class="help-plants">
+        <div><span class="help-pic" id="helpBloom"></span><span><b>Orange flower</b> - right letter, right spot</span></div>
+        <div><span class="help-pic" id="helpBud"></span><span><b>Blue bud</b> - in the word, wrong spot</span></div>
+        <div><span class="help-pic" id="helpStone"></span><span><b>Gray stone</b> - not in the word</span></div>
       </div>
       <p>Stuck? Tap <b>Hint</b> to show one letter.</p>
       <button class="big" id="helpClose" type="button">Let's play</button>
@@ -88,7 +113,7 @@
   <!-- "Game over" panel -->
   <div class="sheet" id="endSheet" hidden>
     <div class="panel" role="dialog" aria-labelledby="endTitle">
-      <h2 id="endTitle">Well done!</h2>
+      <h2 id="endTitle">Your garden bloomed!</h2>
       <p id="endText"></p>
       <div class="answer" id="endWord"></div>
       <div class="stats">
@@ -96,7 +121,7 @@
         <div><b id="sWon">0</b><span>Won</span></div>
         <div><b id="sStreak">0</b><span>Streak</span></div>
       </div>
-      <button class="big" id="againBtn" type="button">New word</button>
+      <button class="big" id="againBtn" type="button">Plant a new word</button>
     </div>
   </div>
 

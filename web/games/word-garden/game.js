@@ -1,25 +1,28 @@
 // =============================================================
 //  Word Garden - game logic
-//  WORDS (the list of secret words) comes from words.js,
+//  WORDS (the lists of secret words) comes from words.js,
 //  which index.html loads before this file.
 // =============================================================
 
 // ---------- Settings you can change ----------
-const WORD_LENGTH = 5;   // letters per word (words.js must match)
-const MAX_GUESSES = 6;   // number of tries
+// Tries for each word length. Longer words get more tries.
+const TRIES = { 4: 5, 5: 6, 6: 7 };
 
 // Keyboard layout. "E" = Enter key, "⌫" = Delete key.
 const KEYBOARD_ROWS = ["qwertyuiop", "asdfghjkl", "⌫zxcvbnmE"];
 
-// Encouraging messages shown after a wrong guess (picked in turn).
-const KEEP_GOING_MESSAGES = ["Keep going!", "Good try!", "You're getting closer", "Nice guess!"];
-
-// Title on the "you won" panel, based on how many tries it took.
-const WIN_TITLES = ["Brilliant!", "Wonderful!", "Splendid!", "Great job!", "Phew, got it!", "Just in time!"];
+// Title on the "you won" panel, picked at random.
+const WIN_TITLES = ["Your garden bloomed!", "Wonderful!", "Splendid!", "Great job!", "What a garden!"];
 
 // Does tapping "Give up" set the streak back to 0?
 // true = yes (counts like a loss), false = no (streak is kept).
 const GIVE_UP_ENDS_STREAK = true;
+
+// Where this game saves things on the phone.
+const STATS_KEY = "wg-stats";   // played / won / streak
+const GAME_KEY = "wg-game";     // the word in progress
+const LENGTH_KEY = "wg-len";    // her choice: "4", "5", "6" or "mix"
+const SEEN_KEY = "wg-seen";     // has "How to play" been shown yet
 
 
 // ---------- Saving to the phone ----------
@@ -43,17 +46,35 @@ function save(key, value) {
 
 
 // ---------- Game state ----------
+// state.n       - how many letters this word has (4, 5 or 6)
 // state.answer  - the secret word
-// state.rows    - guesses already entered, e.g. ["plant", "stone"]
+// state.rows    - guesses already planted, e.g. ["plant", "stone"]
 // state.current - letters typed so far for the next guess
 // state.done    - true once the game is won or lost
 // state.hints   - letter positions already revealed by the Hint button
 let state;
-let stats = load("wg-stats", { played: 0, won: 0, streak: 0 });
+let stats = load(STATS_KEY, { played: 0, won: 0, streak: 0 });
+let lengthChoice = String(load(LENGTH_KEY, "5"));
+
+// The word list for one length, skipping any word that's the wrong length.
+function wordsOfLength(n) {
+  return (WORDS[n] || []).map((w) => String(w).toLowerCase().trim()).filter((w) => w.length === n && /^[a-z]+$/.test(w));
+}
+
+function pickLength() {
+  if (lengthChoice === "mix") {
+    const lengths = [4, 5, 6];
+    return lengths[Math.floor(Math.random() * lengths.length)];
+  }
+  return Number(lengthChoice) || 5;
+}
 
 function newState() {
+  const n = pickLength();
+  const list = wordsOfLength(n);
   return {
-    answer: WORDS[Math.floor(Math.random() * WORDS.length)],
+    n,
+    answer: list[Math.floor(Math.random() * list.length)],
     rows: [],
     current: "",
     done: false,
@@ -62,32 +83,119 @@ function newState() {
 }
 
 function saveGame() {
-  save("wg-game", state);
+  save(GAME_KEY, state);
 }
+
+const maxTries = () => TRIES[state.n] || 6;
 
 
 // ---------- Page elements ----------
 const $ = (id) => document.getElementById(id);
-const board = $("board");
+const bed = $("bed");
+const historyBox = $("history");
 const keyboard = $("kb");
 const message = $("msg");
 
 
-// ---------- Building the screen ----------
-function buildBoard() {
-  board.innerHTML = "";
-  for (let r = 0; r < MAX_GUESSES; r++) {
-    const row = document.createElement("div");
-    row.className = "row";
-    for (let c = 0; c < WORD_LENGTH; c++) {
-      const tile = document.createElement("div");
-      tile.className = "tile";
-      row.appendChild(tile);
-    }
-    board.appendChild(row);
-  }
+// ---------- Drawings ----------
+// Each pot is drawn on a 60 x 96 grid. The plant is drawn first,
+// then the pot on top, so the stem looks like it comes out of the soil.
+const POT =
+  `<path d="M10 80 L50 80 L45.5 95 L14.5 95Z" fill="var(--pot)"/>` +                          // pot body
+  `<path d="M39 80 L50 80 L45.5 95 L37 95Z" fill="var(--pot-shade)" opacity="0.6"/>` +        // shadow side
+  `<path d="M15 82.5 L18 82.5 L18.8 92.5 L16.4 92.5Z" fill="#ffffff" opacity="0.22"/>` +      // shine on the clay
+  `<rect x="10" y="80" width="40" height="2.6" fill="var(--pot-shade)" opacity="0.5"/>` +      // shadow under the rim
+  `<rect x="6.5" y="70" width="47" height="10.5" rx="3" fill="var(--pot-rim)"/>` +             // rim
+  `<rect x="44" y="70" width="9.5" height="10.5" rx="3" fill="var(--pot-shade)" opacity="0.35"/>` +
+  `<rect x="9" y="71.4" width="38" height="1.6" rx="0.8" fill="#ffffff" opacity="0.28"/>` +    // light on the rim
+  `<ellipse cx="30" cy="71" rx="21" ry="3.2" fill="var(--soil-dark)"/>` +                       // soil in the pot
+  `<circle cx="22" cy="70.6" r="0.9" fill="var(--soil)"/><circle cx="37" cy="71.3" r="0.8" fill="var(--soil)"/>`;
+
+function letterText(letter, y, size, color) {
+  return `<text x="30" y="${y}" text-anchor="middle" dominant-baseline="central" ` +
+    `font-family="Atkinson Hyperlegible, Segoe UI, Arial, sans-serif" font-weight="700" ` +
+    `font-size="${size}" fill="${color}">${letter.toUpperCase()}</text>`;
 }
 
+function stem(top) {
+  return `<path d="M30 78 L30 ${top}" stroke="var(--stem)" stroke-width="4" stroke-linecap="round"/>` +
+    `<path d="M30 62 C20 58 15 50 16 46 C24 47 29 54 30 60Z" fill="var(--leaf)"/>` +
+    `<path d="M30 56 C40 52 45 45 44 41 C36 42 31 48 30 54Z" fill="var(--leaf)"/>`;
+}
+
+// A little four-pointed sparkle
+function sparkle(x, y, r, delay) {
+  return `<path class="spark" style="animation-delay:${delay}s" d="M${x} ${y - r} Q${x} ${y} ${x + r} ${y} ` +
+    `Q${x} ${y} ${x} ${y + r} Q${x} ${y} ${x - r} ${y} Q${x} ${y} ${x} ${y - r}Z"/>`;
+}
+
+const draw = {
+  // An empty pot, waiting for a letter
+  empty: () => `<svg viewBox="0 0 60 96">${POT}</svg>`,
+
+  // A letter she has typed: a garden marker stuck in the pot
+  typed: (letter) => `<svg viewBox="0 0 60 96">` +
+    `<rect x="27" y="40" width="6" height="38" rx="2" fill="var(--soil)"/>` +
+    `<rect x="12" y="16" width="36" height="30" rx="6" fill="var(--surface)" stroke="var(--soil)" stroke-width="3"/>` +
+    `${letterText(letter, 31.5, 22, "var(--fg)")}${POT}</svg>`,
+
+  // Right letter, right spot: a shiny orange flower
+  bloom: (letter) => {
+    let petals = "", rays = "";
+    for (let i = 0; i < 6; i++) {
+      petals += `<ellipse cx="30" cy="13" rx="9" ry="12" fill="var(--bloom)" transform="rotate(${i * 60} 30 27)"/>` +
+        `<ellipse cx="27" cy="8" rx="2.6" ry="5" class="gloss" transform="rotate(${i * 60} 30 27)"/>`;
+    }
+    for (let i = 0; i < 12; i++) {
+      rays += `<path d="M28.6 27 L30 ${i % 2 ? -4 : -10} L31.4 27Z" transform="rotate(${i * 30} 30 27)"/>`;
+    }
+    return `<svg viewBox="0 0 60 96"><g class="rays">${rays}</g>` +
+      `<circle class="halo" cx="30" cy="27" r="29" fill="url(#bloomGlow)"/>${stem(40)}${petals}` +
+      `<circle cx="30" cy="27" r="12" fill="var(--bloom-center)"/>` +
+      `<ellipse cx="25.5" cy="21.5" rx="4.5" ry="2.6" class="gloss" transform="rotate(-30 25.5 21.5)"/>` +
+      `${letterText(letter, 27.5, 17, "var(--bloom-dark)")}` +
+      `${sparkle(6, 8, 4.5, 0)}${sparkle(55, 14, 3.5, 0.6)}${POT}${sparkle(52, 44, 3, 1.2)}</svg>`;
+  },
+
+  // In the word, wrong spot: a blue bud
+  bud: (letter) => `<svg viewBox="0 0 60 96">${stem(46)}` +
+    `<path d="M30 12 C44 22 44 42 30 50 C16 42 16 22 30 12Z" fill="var(--part)"/>` +
+    `<path d="M22 44 C26 50 34 50 38 44 C34 47 26 47 22 44Z" fill="var(--leaf)"/>` +
+    `${letterText(letter, 31, 18, "#ffffff")}${POT}</svg>`,
+
+  // Not in the word: a gray stone
+  stone: (letter) => `<svg viewBox="0 0 60 96">` +
+    `<path d="M11 74 C10 55 18 44 30 44 C42 44 50 55 49 74Z" fill="var(--stone)" stroke="var(--stone-edge)" stroke-width="2"/>` +
+    `${letterText(letter, 58, 18, "var(--stone-ink)")}${POT}</svg>`,
+};
+
+
+// ---------- Checking a guess ----------
+// Returns what grows in each pot: "bloom", "bud" or "stone".
+function scoreGuess(guess, answer) {
+  const result = Array(guess.length).fill("stone");
+  const unmatched = {}; // letters in the answer not yet matched
+
+  // First pass: right letter, right spot.
+  for (let i = 0; i < guess.length; i++) {
+    if (guess[i] === answer[i]) {
+      result[i] = "bloom";
+    } else {
+      unmatched[answer[i]] = (unmatched[answer[i]] || 0) + 1;
+    }
+  }
+  // Second pass: right letter, wrong spot.
+  for (let i = 0; i < guess.length; i++) {
+    if (result[i] !== "bloom" && unmatched[guess[i]]) {
+      result[i] = "bud";
+      unmatched[guess[i]]--;
+    }
+  }
+  return result;
+}
+
+
+// ---------- Building the keyboard ----------
 function buildKeyboard() {
   keyboard.innerHTML = "";
   for (const line of KEYBOARD_ROWS) {
@@ -119,62 +227,76 @@ function buildKeyboard() {
 }
 
 
-// ---------- Checking a guess ----------
-// Returns a color for each letter: "green", "gold" or "gray".
-function scoreGuess(guess, answer) {
-  const result = Array(WORD_LENGTH).fill("gray");
-  const unmatched = {}; // letters in the answer not yet matched green
-
-  // First pass: exact matches.
-  for (let i = 0; i < WORD_LENGTH; i++) {
-    if (guess[i] === answer[i]) {
-      result[i] = "green";
-    } else {
-      unmatched[answer[i]] = (unmatched[answer[i]] || 0) + 1;
-    }
-  }
-  // Second pass: right letter, wrong spot.
-  for (let i = 0; i < WORD_LENGTH; i++) {
-    if (result[i] !== "green" && unmatched[guess[i]]) {
-      result[i] = "gold";
-      unmatched[guess[i]]--;
-    }
-  }
-  return result;
-}
-
-
-// ---------- Drawing the current state ----------
-function render() {
+// ---------- Drawing the screen ----------
+// grow = true right after a guess, so the plants grow in one by one.
+function render(grow = false) {
   saveGame();
 
-  // Tiles
-  for (let r = 0; r < MAX_GUESSES; r++) {
-    const guess = state.rows[r];
-    const word = guess || (r === state.rows.length ? state.current : "");
-    const colors = guess ? scoreGuess(guess, state.answer) : null;
-    const tiles = board.children[r].children;
+  // The bed: the word being typed (or the guess that just grew)
+  bed.style.setProperty("--n", state.n);
+  bed.innerHTML = "";
+  const justPlanted = grow && state.rows.length > 0;
+  const last = state.rows[state.rows.length - 1];
+  const lastScore = last ? scoreGuess(last, state.answer) : null;
 
-    for (let c = 0; c < WORD_LENGTH; c++) {
-      const letter = word[c] || "";
-      tiles[c].textContent = letter;
-      tiles[c].className = "tile" + (letter ? " filled" : "") + (colors ? " " + colors[c] : "");
+  for (let i = 0; i < state.n; i++) {
+    const plot = document.createElement("div");
+    plot.className = "plot";
+    if (justPlanted || (state.done && last && !state.current)) {
+      plot.innerHTML = draw[lastScore[i]](last[i]);
+      if (justPlanted) {
+        plot.firstChild.classList.add("grow");
+        plot.firstChild.style.animationDelay = `${i * 0.12}s`;
+      }
+    } else {
+      const letter = state.current[i];
+      plot.innerHTML = letter ? draw.typed(letter) : draw.empty();
     }
+    bed.appendChild(plot);
   }
 
+  // Earlier guesses, newest at the top
+  historyBox.style.setProperty("--n", state.n);
+  historyBox.innerHTML = "";
+  if (state.rows.length === 0) {
+    historyBox.innerHTML = `<div class="history-empty">Your earlier guesses will grow here</div>`;
+  }
+  [...state.rows].reverse().forEach((guess) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    scoreGuess(guess, state.answer).forEach((result, i) => {
+      const plot = document.createElement("div");
+      plot.className = "plot";
+      plot.innerHTML = draw[result](guess[i]);
+      row.appendChild(plot);
+    });
+    historyBox.appendChild(row);
+  });
+
   // Keyboard colors: each key shows the best result that letter has had.
-  const rank = { green: 3, gold: 2, gray: 1 };
+  const rank = { bloom: 3, bud: 2, stone: 1 };
   const best = {};
   for (const guess of state.rows) {
-    scoreGuess(guess, state.answer).forEach((color, i) => {
+    scoreGuess(guess, state.answer).forEach((result, i) => {
       const letter = guess[i];
-      if (!best[letter] || rank[color] > rank[best[letter]]) best[letter] = color;
+      if (!best[letter] || rank[result] > rank[best[letter]]) best[letter] = result;
     });
   }
   keyboard.querySelectorAll(".k").forEach((button) => {
-    button.classList.remove("green", "gold", "gray");
-    const color = best[button.dataset.k];
-    if (color) button.classList.add(color);
+    button.classList.remove("s-bloom", "s-part", "s-out");
+    const result = best[button.dataset.k];
+    if (result === "bloom") button.classList.add("s-bloom");
+    if (result === "bud") button.classList.add("s-part");
+    if (result === "stone") button.classList.add("s-out");
+  });
+
+  $("tries").textContent = `Try ${Math.min(state.rows.length + 1, maxTries())} of ${maxTries()}`;
+  showLengthChoice();
+}
+
+function showLengthChoice() {
+  $("lenPick").querySelectorAll("button").forEach((b) => {
+    b.setAttribute("aria-pressed", b.dataset.v === lengthChoice);
   });
 }
 
@@ -187,11 +309,10 @@ function showStreak() {
   $("streakNum").textContent = stats.streak;
 }
 
-function shakeRow() {
-  const row = board.children[state.rows.length];
-  row.classList.remove("shake");
-  void row.offsetWidth; // restarts the animation
-  row.classList.add("shake");
+function shakeBed() {
+  bed.classList.remove("shake");
+  void bed.offsetWidth; // restarts the animation
+  bed.classList.add("shake");
 }
 
 
@@ -200,28 +321,49 @@ function press(key) {
   if (state.done) return;
 
   if (key === "enter") {
-    if (state.current.length < WORD_LENGTH) {
-      say(`Fill in all ${WORD_LENGTH} letters first`);
-      shakeRow();
+    if (state.current.length < state.n) {
+      say(`Plant all ${state.n} letters first`);
+      shakeBed();
       return;
     }
     const guess = state.current;
     state.rows.push(guess);
     state.current = "";
-    render();
+    render(true);
 
-    if (guess === state.answer) finish(true);
-    else if (state.rows.length === MAX_GUESSES) finish(false);
-    else say(KEEP_GOING_MESSAGES[state.rows.length % KEEP_GOING_MESSAGES.length]);
+    if (guess === state.answer) {
+      finish(true);
+    } else if (state.rows.length >= maxTries()) {
+      finish(false);
+    } else {
+      const blooms = scoreGuess(guess, state.answer).filter((r) => r === "bloom").length;
+      say(blooms ? `${blooms} ${blooms === 1 ? "flower" : "flowers"} bloomed!` : "Nothing bloomed yet - keep planting");
+    }
 
   } else if (key === "back") {
     state.current = state.current.slice(0, -1);
     render();
 
-  } else if (state.current.length < WORD_LENGTH) {
+  } else if (state.current.length < state.n) {
     state.current += key;
     render();
   }
+}
+
+
+// ---------- Letters: 4 / 5 / 6 / Mix ----------
+function chooseLength(value) {
+  lengthChoice = value;
+  save(LENGTH_KEY, value);
+  showLengthChoice();
+
+  // Nothing planted yet (or the word is finished): start a new word right away.
+  if (state.done || state.rows.length === 0) {
+    newGame();
+    return;
+  }
+  // Partway through a word: keep it, and use the new choice for the next word.
+  say(value === "mix" ? "Your next word will be a surprise length" : `Your next word will have ${value} letters`);
 }
 
 
@@ -232,12 +374,12 @@ function hint() {
 
   const known = new Set(state.hints);
   for (const guess of state.rows) {
-    scoreGuess(guess, state.answer).forEach((color, i) => {
-      if (color === "green") known.add(i);
+    scoreGuess(guess, state.answer).forEach((result, i) => {
+      if (result === "bloom") known.add(i);
     });
   }
   const open = [];
-  for (let i = 0; i < WORD_LENGTH; i++) if (!known.has(i)) open.push(i);
+  for (let i = 0; i < state.n; i++) if (!known.has(i)) open.push(i);
 
   if (open.length === 0) {
     say("You already have every letter!");
@@ -282,20 +424,20 @@ function finish(won, gaveUp = false) {
   } else if (!gaveUp || GIVE_UP_ENDS_STREAK) {
     stats.streak = 0;
   }
-  save("wg-stats", stats);
+  save(STATS_KEY, stats);
   showStreak();
 
-  if (won) say("You got it!");
+  if (won) say("Your whole garden bloomed!");
   else if (gaveUp) say("Here's the word");
-  else say("So close!");
+  else say("Good try!");
 
-  // Short pause so she sees the colors before the panel slides up.
+  // Short pause so she sees the plants grow before the panel slides up.
   // No pause when she gave up - she asked to see the word.
   setTimeout(() => {
     const tries = state.rows.length;
-    $("endTitle").textContent = won ? WIN_TITLES[tries - 1] : gaveUp ? "No worries" : "Good game";
+    $("endTitle").textContent = won ? WIN_TITLES[Math.floor(Math.random() * WIN_TITLES.length)] : gaveUp ? "No worries" : "Good game";
     $("endText").textContent = won
-      ? `You found the word in ${tries} ${tries === 1 ? "try" : "tries"}.`
+      ? `You grew the word in ${tries} ${tries === 1 ? "try" : "tries"}.`
       : "The word was:";
     $("endWord").textContent = state.answer;
     $("sPlayed").textContent = stats.played;
@@ -303,15 +445,21 @@ function finish(won, gaveUp = false) {
     $("sStreak").textContent = stats.streak;
     $("endSheet").hidden = false;
     $("againBtn").focus();
-  }, gaveUp ? 0 : 900);
+  }, gaveUp ? 0 : won ? 1300 : 1000);
 }
 
 function newGame() {
   state = newState();
   $("endSheet").hidden = true;
-  say(`Guess the ${WORD_LENGTH}-letter word`);
+  say("Plant a word to see what grows");
   render();
 }
+
+
+// ---------- "How to play" pictures ----------
+$("helpBloom").innerHTML = draw.bloom("p");
+$("helpBud").innerHTML = draw.bud("l");
+$("helpStone").innerHTML = draw.stone("a");
 
 
 // ---------- Wiring up buttons ----------
@@ -320,9 +468,15 @@ keyboard.addEventListener("click", (e) => {
   if (button) press(button.dataset.k);
 });
 
+$("lenPick").addEventListener("click", (e) => {
+  const button = e.target.closest("button");
+  if (button) chooseLength(button.dataset.v);
+});
+
 // A real keyboard works too (handy when testing on a computer).
 document.addEventListener("keydown", (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden) return;
   if (e.key === "Enter") press("enter");
   else if (e.key === "Backspace") press("back");
   else if (/^[a-z]$/i.test(e.key)) press(e.key.toLowerCase());
@@ -340,20 +494,26 @@ $("giveUpBtn").onclick = askGiveUp;
 $("giveUpYes").onclick = giveUp;
 $("giveUpNo").onclick = () => { $("giveUpSheet").hidden = true; };
 $("helpBtn").onclick = () => { $("helpSheet").hidden = false; $("helpClose").focus(); };
-$("helpClose").onclick = () => { $("helpSheet").hidden = true; save("wg-seen", 1); };
+$("helpClose").onclick = () => { $("helpSheet").hidden = true; save(SEEN_KEY, 1); };
 $("againBtn").onclick = newGame;
 
 
 // ---------- Start ----------
-buildBoard();
 buildKeyboard();
 showStreak();
 
-const savedGame = load("wg-game", null);
-state = savedGame && !savedGame.done ? savedGame : newState();
-// Games saved by version 1.0 used "cur" instead of "current".
-if (typeof state.current !== "string") state.current = state.cur || "";
+const savedGame = load(GAME_KEY, null);
+if (savedGame && !savedGame.done && typeof savedGame.answer === "string") {
+  state = savedGame;
+  // Games saved before the garden update: always 5 letters, and old ones used "cur".
+  state.n = state.answer.length;
+  if (typeof state.current !== "string") state.current = state.cur || "";
+  if (!Array.isArray(state.rows)) state.rows = [];
+  if (!Array.isArray(state.hints)) state.hints = [];
+} else {
+  state = newState();
+}
 render();
 
 // Show "How to play" the very first time.
-if (!load("wg-seen", 0)) $("helpSheet").hidden = false;
+if (!load(SEEN_KEY, 0)) $("helpSheet").hidden = false;

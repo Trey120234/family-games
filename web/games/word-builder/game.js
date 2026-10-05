@@ -1,5 +1,5 @@
 // =============================================================
-//  Word Builder - game logic
+//  Word Grower - game logic
 //  PUZZLES (the list of puzzles) comes from puzzles.js,
 //  which index.html loads before this file.
 // =============================================================
@@ -148,13 +148,13 @@ function drawBoard() {
       box.className = "box";
 
       if (state.found[r]) {
-        box.textContent = word[i];
+        box.innerHTML = flower(word[i]);
         box.classList.add("found");
       } else if (state.gaveUp) {
-        box.textContent = word[i];
+        box.innerHTML = `<span class="stone">${word[i]}</span>`;
         box.classList.add("missed");
       } else if (i < state.hints[r]) {
-        box.textContent = word[i];
+        box.innerHTML = `<span class="seed">${word[i]}</span>`;   // hinted letter: a seed planted in the pot
         box.classList.add("hinted");
       }
       row.appendChild(box);
@@ -163,25 +163,44 @@ function drawBoard() {
   });
 }
 
-// The word she is spelling right now.
+// A shiny orange flower with the letter in its middle (for found words).
+function flower(letter) {
+  let rays = "", petals = "";
+  for (let i = 0; i < 12; i++) {
+    rays += `<path d="M28.8 30 L30 ${i % 2 ? 1 : -4} L31.2 30Z" transform="rotate(${i * 30} 30 30)"/>`;
+  }
+  for (let i = 0; i < 6; i++) {
+    petals += `<ellipse cx="30" cy="15" rx="9" ry="12" fill="var(--bloom)" transform="rotate(${i * 60} 30 30)"/>` +
+              `<ellipse cx="27" cy="10" rx="2.4" ry="4.5" class="gloss" transform="rotate(${i * 60} 30 30)"/>`;
+  }
+  const star = (x, y, r, d) => `<path class="spark" style="animation-delay:${d}s" d="M${x} ${y - r} Q${x} ${y} ${x + r} ${y} Q${x} ${y} ${x} ${y + r} Q${x} ${y} ${x - r} ${y} Q${x} ${y} ${x} ${y - r}Z"/>`;
+  return `<svg viewBox="0 0 60 60" role="img" aria-label="${letter}"><g class="rays">${rays}</g>${petals}` +
+    `<circle cx="30" cy="30" r="15.5" fill="var(--bloom-center)"/>` +
+    `` +
+    `<text x="30" y="31" text-anchor="middle" dominant-baseline="central" font-family="Atkinson Hyperlegible, Segoe UI, Arial, sans-serif" font-weight="700" font-size="24" fill="var(--flower-ink)">${letter.toUpperCase()}</text>` +
+    `${star(6, 6, 5, 0)}${star(55, 12, 4, 0.5)}${star(52, 54, 3.5, 1)}</svg>`;
+}
+
+// The word she is spelling right now: a row of 7 empty pots,
+// and each letter she taps is planted as a seed in the next pot.
 function drawEntry() {
   entry.innerHTML = "";
-  if (state.picked.length === 0) {
-    const hint = document.createElement("span");
-    hint.className = "entry-hint";
-    hint.textContent = state.done ? "" : "Tap letters below to spell a word";
-    entry.appendChild(hint);
-    return;
-  }
-  for (const i of state.picked) {
-    const letter = document.createElement("span");
-    letter.className = "entry-letter";
-    letter.textContent = state.tiles[i];
-    entry.appendChild(letter);
+  const slots = state.tiles.length;
+  for (let n = 0; n < slots; n++) {
+    const pot = document.createElement("span");
+    pot.className = "entry-pot";
+    const i = state.picked[n];
+    if (i !== undefined) {
+      const seed = document.createElement("span");
+      seed.className = "seed";
+      seed.textContent = state.tiles[i];
+      pot.appendChild(seed);
+    }
+    entry.appendChild(pot);
   }
 }
 
-// The 7 letter buttons.
+// The 7 letter seeds to pick from.
 function drawLetters() {
   lettersBox.innerHTML = "";
   state.tiles.forEach((letter, i) => {

@@ -13,14 +13,14 @@ const COLLECTION_TITLE = "Games";
 const GAMES = [
   {
     name: "Word Garden",
-    description: "Guess the hidden 5-letter word in 6 tries.",
+    description: "Grow the hidden word, 4 to 6 letters.",
     folder: "games/word-garden",   // where the game's files live
     icon: "icon.png",              // picture inside that folder
     statsKey: "wg-stats",          // where the game saves its stats (optional)
   },
 
   {
-    name: "Word Builder",
+    name: "Word Grower",
     description: "Spell 7 hidden words from the same 7 letters.",
     folder: "games/word-builder",
     icon: "icon.png",

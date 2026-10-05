@@ -1,5 +1,5 @@
 // =============================================================
-//  Word Builder - the puzzles.
+//  Word Grower - the puzzles.
 //
 //  Each line is one puzzle, in this order:
 //    the 7-letter word, the 6-letter word, two 5-letter words,

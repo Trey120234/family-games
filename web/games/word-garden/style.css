@@ -2,119 +2,196 @@
    Word Garden - styles for this game only.
    Fonts and colors come from ../../shared/theme.css.
    The top bar, buttons and panels come from ../../shared/ui.css.
+
+   Garden look: each letter grows in a clay pot.
+     orange flower = right letter, right spot
+     blue bud      = in the word, wrong spot
+     gray stone    = not in the word
    ============================================================= */
 
-/* ---------- Letter grid ---------- */
-.board-wrap {
+/* ---------- Garden colors ---------- */
+:root {
+  --soil: #8a6a4a; --soil-dark: #5b4330; --stem: #3f8a4f; --leaf: #5aa65e;
+  --pot: #c8693f; --pot-rim: #db7d50; --pot-shade: #9c4a28;          /* clay pots */
+  --wood: #a0703f; --wood-light: #c08a52; --wood-dark: #7a5130;       /* wooden shelves */
+  --grass: #cfe3c6;
+  --tuft: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2228%22%20height%3D%2214%22%20viewBox%3D%220%200%2028%2014%22%3E%3Cpath%20d%3D%22M0%2014%20Q3%206%202%201%20Q5%207%206%2014Z%20M7%2014%20Q9%205%2012%203%20Q10%208%2011%2014Z%20M13%2014%20Q14%207%2017%200%20Q17%207%2018%2014Z%20M19%2014%20Q20%206%2024%202%20Q22%208%2023%2014Z%20M24%2014%20Q26%208%2028%206%20L28%2014Z%22%20fill%3D%22%23a9cf9c%22/%3E%3C/svg%3E");
+  /* The three meanings - different color AND brightness, readable with color blindness */
+  --bloom: #e8590c; --bloom-dark: #b8430a; --bloom-center: #fff8ec;   /* right spot: orange flower */
+  --ray: #ffb21f; --glow: #ffd45c;                                    /* shine around a flower */
+  --part: #1c64c8;                                                    /* wrong spot: blue bud */
+  --stone: #d6d2cb; --stone-edge: #bdb7ae; --stone-ink: #8a847b;     /* not in word: gray stone */
+  --key-out: #8f897f; --key-out-ink: #ffffff;                         /* keyboard: letter not in word */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --soil: #6e533a; --soil-dark: #3f2f22;
+    --pot: #a8552f; --pot-rim: #bb6538; --pot-shade: #7a381c;
+    --wood: #7c5530; --wood-light: #94673b; --wood-dark: #5a3c22;
+    --grass: #22352a;
+    --tuft: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2228%22%20height%3D%2214%22%20viewBox%3D%220%200%2028%2014%22%3E%3Cpath%20d%3D%22M0%2014%20Q3%206%202%201%20Q5%207%206%2014Z%20M7%2014%20Q9%205%2012%203%20Q10%208%2011%2014Z%20M13%2014%20Q14%207%2017%200%20Q17%207%2018%2014Z%20M19%2014%20Q20%206%2024%202%20Q22%208%2023%2014Z%20M24%2014%20Q26%208%2028%206%20L28%2014Z%22%20fill%3D%22%232d4636%22/%3E%3C/svg%3E");
+    --bloom: #ff6a1f; --bloom-center: #fdf1e2; --ray: #ffcc4d; --glow: #ffdf7a;
+    --part: #4a8df0;
+    --stone: #5a5650; --stone-edge: #6b665f; --stone-ink: #b4ada3;
+    --key-out: #1c1b18; --key-out-ink: #8f897f;
+  }
+}
+
+/* ---------- Letters 4 / 5 / 6 / Mix, and "Try 1 of 6" ---------- */
+.len-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+}
+.len-label { font-size: 0.9rem; font-weight: 700; color: var(--muted); }
+.seg { flex: 1; display: flex; gap: 5px; }
+.seg button {
+  flex: 1;
+  min-height: 42px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--fg);
+  font: 700 1rem var(--body);
+  cursor: pointer;
+}
+.seg button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--on-tile); }
+.seg button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.tries { flex: none; font-size: 0.95rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- Little key explaining the three plants ---------- */
+.legend { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; padding-top: 6px; font-size: 0.9rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 4px; }
+.legend i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.legend .l-bloom { background: var(--bloom); }
+.legend .l-part { background: var(--part); }
+.legend .l-out { background: var(--stone); border: 2px solid var(--stone-edge); }
+
+.msg { min-height: 2em; padding-block: 2px; }
+
+/* ---------- The garden bed for the word being typed ---------- */
+.bed {
+  --cell: min(64px, calc((100vw - 56px) / var(--n)));
+  position: relative;
+  flex: none;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 4px 16px;
+  border-radius: 18px 18px 8px 8px;
+  background:
+    var(--tuft) repeat-x left 0 bottom calc(18px + 42%) / 28px 14px,                                         /* grass blades along the top */
+    linear-gradient(to top, transparent 0 18px, var(--grass) 18px calc(18px + 42%), transparent calc(18px + 42%)); /* grassy bank behind the pots */
+}
+.bed .plot { width: var(--cell); height: calc(var(--cell) * 1.6); }
+.bed.shake { animation: shake 0.4s; }
+
+/* Wooden shelves under the bed and under each earlier guess */
+.bed::after, .history .row::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 70px, rgba(0,0,0,0.18) 70px 72px),   /* plank joints */
+    linear-gradient(var(--wood-light), var(--wood) 45%, var(--wood-dark));           /* rounded wood look */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.22);
+}
+.bed::after { height: 18px; }
+.plot { position: relative; z-index: 1; }
+
+/* ---------- Earlier guesses, newest at the top ---------- */
+.history {
   flex: 1;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.board {
-  height: 100%;
-  max-height: 420px;
-  max-width: 100%;
-  aspect-ratio: 5 / 6;
-  display: grid;
-  grid-template-rows: repeat(6, 1fr);
-  gap: 7px;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 7px;
-}
-
-.tile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  font: 700 clamp(1.6rem, 8vw, 2.4rem) var(--body);
-  text-transform: uppercase;
-  user-select: none;
-}
-
-.tile.filled { border-color: var(--muted); animation: pop 0.12s ease-out; }
-.tile.green  { background: var(--green); border-color: var(--green); color: var(--on-tile); }
-.tile.gold   { background: var(--gold);  border-color: var(--gold);  color: var(--on-tile); }
-.tile.gray   { background: var(--gray);  border-color: var(--gray);  color: var(--on-tile); }
-
-.row.shake { animation: shake 0.4s; }
-
-/* ---------- On-screen keyboard ---------- */
-.kb {
+  overflow-y: auto;
+  padding-block: 10px 6px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  padding-block: 8px 12px;
+  gap: 6px;
 }
+.history .row { position: relative; flex: none; display: flex; justify-content: center; gap: 3px; padding-bottom: 7px; }
+.history .row::after { height: 9px; border-radius: 4px; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.18); }
+.history .plot {
+  --h: min(44px, calc((100vw - 60px) / var(--n) * 0.8));
+  width: var(--h);
+  height: calc(var(--h) * 1.6);
+}
+.history-empty { text-align: center; color: var(--muted); font-size: 0.95rem; padding-top: 6px; }
 
-.krow {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-}
+/* ---------- The drawings ---------- */
+.plot svg, .help-pic svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.grow { animation: grow 0.45s ease-out both; transform-origin: 50% 100%; }
+@keyframes grow { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Shine on a flower: glow, slowly turning light rays, gloss and twinkling sparkles */
+.rays { transform-origin: 30px 27px; animation: spin 14s linear infinite; }
+.rays path { fill: var(--ray); opacity: 0.55; }
+.halo { transform-origin: 30px 27px; animation: glowPulse 2.4s ease-in-out infinite; }
+.spark { fill: #fff6c8; stroke: var(--ray); stroke-width: 0.8; transform-box: fill-box; transform-origin: center; animation: twinkle 1.8s ease-in-out infinite; }
+.gloss { fill: #ffffff; opacity: 0.45; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes glowPulse { 0%, 100% { transform: scale(0.92); opacity: 0.75; } 50% { transform: scale(1.08); opacity: 1; } }
+@keyframes twinkle { 0%, 100% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1); opacity: 1; } }
+
+/* Earlier guesses and the help panel: a calm, still glow (no moving parts) */
+.history .rays, .history .halo, .help-pic .rays, .help-pic .halo { animation: none; }
+.history .rays path { opacity: 0.35; }
+.history .spark, .help-pic .spark { display: none; }
+
+/* ---------- On-screen keyboard ---------- */
+.kb { display: flex; flex-direction: column; gap: 6px; padding-block: 6px 12px; }
+.krow { display: flex; justify-content: center; gap: 5px; }
 
 .k {
   flex: 1;
   min-width: 0;
-  height: 60px;
+  height: 54px;
   padding: 0;
+  overflow: hidden;
   border: 0;
   border-radius: 8px;
   background: var(--key);
   color: var(--key-fg);
-  font: 700 1.35rem var(--body);
+  font: 700 1.3rem var(--body);
   text-transform: uppercase;
   cursor: pointer;
   touch-action: manipulation;
 }
-
-.k.wide { flex: 1.6; font-size: 0.95rem; }
-.k.del  { font-size: 1.6rem; }
+/* Enter and Delete are wider. The word "Enter" shrinks to fit on narrow phones. */
+.k.wide { flex: 1.6; padding: 0 1px; font-size: clamp(0.7rem, 3.3vw, 1rem); text-transform: none; }
+.k.del  { font-size: 1.5rem; }
 .k:active { filter: brightness(0.88); }
+.k:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-.k:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.k.green { background: var(--green); color: var(--on-tile); }
-.k.gold  { background: var(--gold);  color: var(--on-tile); }
-.k.gray  { background: var(--gray);  color: var(--on-tile); }
+.k.s-bloom { background: var(--bloom); color: #ffffff; }
+.k.s-part  { background: var(--part);  color: #ffffff; }
+.k.s-out   { background: var(--key-out); color: var(--key-out-ink); }
 
 /* ---------- "How to play" panel pieces ---------- */
-.legend { display: grid; gap: 10px; }
-.legend div { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; }
-
-.swatch { width: 30px; height: 30px; flex: none; border-radius: 6px; }
-.swatch.green { background: var(--green); }
-.swatch.gold  { background: var(--gold); }
-.swatch.gray  { background: var(--gray); }
-
-.example { display: flex; gap: 6px; }
-.example .tile { width: 46px; height: 46px; font-size: 1.5rem; }
+.help-plants { display: grid; gap: 8px; }
+.help-plants > div { display: flex; align-items: center; gap: 12px; font-size: 1.05rem; }
+.help-pic { width: 40px; height: 64px; flex: none; }
 
 /* The secret word on the game-over panel */
 .answer {
   font: 700 2rem var(--body);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--bloom-dark);
 }
 
 /* ---------- Small screens and reduced motion ---------- */
-@media (max-height: 640px) {
-  .k { height: 50px; }
+@media (max-height: 720px) {
+  .k { height: 46px; }
+  .legend { padding-top: 4px; font-size: 0.85rem; }
+  .bed { --cell: min(54px, calc((100vw - 56px) / var(--n))); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tile.filled, .row.shake { animation: none; }
+  .grow, .bed.shake, .rays, .halo, .spark { animation: none; }
+  .spark { transform: none; opacity: 0.9; }
 }
