@@ -170,6 +170,23 @@
   color: var(--fg);
 }
 
+/* iPhone steps: numbered list with the Share icon drawn inline */
+.steps {
+  margin: 0;
+  padding-left: 1.4em;
+  display: grid;
+  gap: 8px;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--fg);
+}
+.share-icon {
+  width: 1.3em;
+  height: 1.3em;
+  vertical-align: -0.25em;
+  color: #1a73e8;   /* the blue iPhone uses for its Share button */
+}
+
 @media (prefers-reduced-motion: reduce) {
   .game-card:active { transform: none; }
 }

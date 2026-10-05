@@ -1,0 +1,230 @@
+/* =============================================================
+   Solitaire - styles for this game only.
+   Fonts and colors come from ../../shared/theme.css.
+   The top bar, buttons and panels come from ../../shared/ui.css.
+   Card sizes and positions are set by game.js.
+   ============================================================= */
+
+/* ---------- Colors ---------- */
+:root {
+  --felt: #3f7d55;          /* garden-green table */
+  --felt-dark: #346b48;
+  --wood: #a0703f; --wood-light: #c08a52; --wood-dark: #7a5130;   /* wooden table edge */
+  --card-face: #fffdf6;     /* ivory card front */
+  --card-edge: #c9c2ae;
+  --ink-red: #c62828;       /* hearts and diamonds */
+  --ink-black: #1d2420;     /* spades and clubs */
+  --back: #2f7d4f;          /* card back: green with leaves */
+  --back-edge: #f3ead2;
+  --slot: rgba(255, 255, 255, 0.4);   /* outline of an empty spot */
+  --select: #f2b705;        /* gold edge on the chosen card */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --felt: #2c5a3d;
+    --felt-dark: #244c33;
+    --wood: #7c5530; --wood-light: #94673b; --wood-dark: #5a3c22;
+    --card-face: #f4efe2;
+    --card-edge: #a9a28f;
+    --back: #2a6e45;
+    --slot: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Only two buttons in the top bar here (Give up, Help) */
+.header-buttons { grid-template-columns: repeat(2, 1fr); }
+
+/* ---------- Timer / moves ---------- */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-block: 8px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.timer::before { content: "Time "; font-weight: 400; color: var(--muted); }
+.moves { color: var(--muted); font-weight: 400; }
+
+.msg { min-height: 2em; padding-block: 2px; }
+
+/* ---------- The table ---------- */
+.table-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  margin-inline: -6px;           /* a little wider than the rest of the page, for bigger cards */
+  border: 5px solid var(--wood);
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 2px var(--wood-dark), 0 3px 6px rgba(0, 0, 0, 0.2);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.08), transparent 60%),
+    repeating-linear-gradient(45deg, transparent 0 6px, rgba(0, 0, 0, 0.025) 6px 7px),   /* soft cloth texture */
+    var(--felt);
+  overflow: hidden;
+}
+
+/* game.js sets the size of the table and puts every card on it.
+   "isolation" keeps the cards' layer order inside the table, so pop-up
+   panels (How to play, Give up) always appear on top of the cards. */
+.table {
+  position: relative;
+  isolation: isolate;
+  flex: 1;
+  margin: 6px;
+}
+
+/* ---------- One card ---------- */
+.card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--cw);
+  height: var(--ch);
+  border-radius: calc(var(--cw) * 0.12);
+  transition: left 0.18s ease, top 0.18s ease;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Front of a card */
+.card.up {
+  background: var(--card-face);
+  border: 1px solid var(--card-edge);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.card.red { color: var(--ink-red); }
+.card.black { color: var(--ink-black); }
+
+/* Rank and suit in the top-left corner: big, because that's all she sees
+   on a card that's partly covered */
+.corner {
+  position: absolute;
+  left: 4%;
+  top: 1%;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  font: 700 calc(var(--cw) * 0.46) / 1 var(--body);
+  letter-spacing: -0.04em;
+}
+.corner svg { width: calc(var(--cw) * 0.36); height: calc(var(--cw) * 0.36); }
+
+/* Big suit in the middle of the card */
+.middle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  display: flex;
+  justify-content: center;
+}
+.middle svg { width: calc(var(--cw) * 0.6); height: calc(var(--cw) * 0.6); }
+
+/* Jack, Queen, King: a big letter with a little crown */
+.face-letter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8%;
+  text-align: center;
+  font: 400 calc(var(--cw) * 0.56) / 1 var(--display);
+}
+.face-letter::before {
+  content: "";
+  display: block;
+  width: calc(var(--cw) * 0.36);
+  height: calc(var(--cw) * 0.14);
+  margin: 0 auto 1px;
+  background: currentColor;
+  opacity: 0.85;
+  clip-path: polygon(0 100%, 0 20%, 22% 60%, 50% 0, 78% 60%, 100% 20%, 100% 100%);
+}
+
+/* Back of a card: green with a leaf pattern and a cream border */
+.card.down {
+  border: 2px solid var(--back-edge);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 2 C12 4 12 9 8 13 C4 9 4 4 8 2Z' fill='%23ffffff' fill-opacity='0.16'/%3E%3Cpath d='M8 3 L8 12.5' stroke='%23ffffff' stroke-opacity='0.22' stroke-width='0.7'/%3E%3C/svg%3E") center / 14px 14px,
+    var(--back);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* The chosen card (and any cards on top of it) */
+.card.selected {
+  outline: 3px solid var(--select);
+  outline-offset: -1px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Tapped somewhere a card can't go */
+.card.nope { animation: nope 0.35s; }
+@keyframes nope { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+/* ---------- Empty spots ---------- */
+.slot {
+  position: absolute;
+  width: var(--cw);
+  height: var(--ch);
+  border: 2px dashed var(--slot);
+  border-radius: calc(var(--cw) * 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slot);
+  font: 700 calc(var(--cw) * 0.42) var(--body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.slot svg { width: 60%; height: 60%; }
+
+/* The deck spot when it's empty: a circle arrow, meaning "tap to start the deck again" */
+.slot.stock { border-style: solid; }
+.slot.stock.empty-for-good { opacity: 0.4; }
+
+/* ---------- Undo / Finish ---------- */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-block: 8px 12px;
+}
+
+.ctrl {
+  min-height: 56px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--key);
+  color: var(--key-fg);
+  font: 700 1.15rem var(--body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.ctrl:active { filter: brightness(0.9); }
+.ctrl:disabled { opacity: 0.45; cursor: default; }
+.ctrl:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Finish glows when the rest of the game can play itself */
+.ctrl.ready { background: var(--accent); color: var(--on-tile); animation: readyGlow 1.4s ease-in-out infinite; }
+@keyframes readyGlow { 50% { box-shadow: 0 0 0 5px rgba(242, 183, 5, 0.6); } }
+
+.new-best { font-weight: 700; color: var(--accent); }
+
+/* ---------- Small screens and reduced motion ---------- */
+@media (max-height: 700px) {
+  .ctrl { min-height: 48px; }
+  .controls { padding-block: 6px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+  .card.nope, .ctrl.ready { animation: none; }
+}
+
+/* A face-down card hides its front */
+.card.down > * { display: none; }

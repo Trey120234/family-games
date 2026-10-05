@@ -78,15 +78,20 @@ function showHome() {
   list.appendChild(makeComingSoon());
 }
 
-// Shows the "Get the app" box only where the download makes sense:
-// not inside the app itself (Android marks it with "; wv)"), and not on
-// iPhones or iPads, which can't install Android apps.
+// Shows the right "Get the app" box:
+//  - Android phones and computers: the Android download
+//  - iPhones and iPads: steps to add Games to the home screen
+//  - nothing when Games is already running as an app
+//    (Android app: "; wv)" in its name; iPhone home screen: navigator.standalone)
 function showDownload() {
   const agent = navigator.userAgent;
   const insideApp = /; wv\)/.test(agent);
   const isApple = /iPhone|iPad|iPod/.test(agent) ||
     (/Macintosh/.test(agent) && navigator.maxTouchPoints > 1);   // newer iPads
-  $("getApp").hidden = insideApp || isApple;
+  const onHomeScreen = navigator.standalone === true ||
+    window.matchMedia("(display-mode: standalone)").matches;
+  $("getApp").hidden = insideApp || isApple || onHomeScreen;
+  $("getAppIphone").hidden = !isApple || onHomeScreen;
 }
 
 // Phones often download without saying so - tell her it's happening

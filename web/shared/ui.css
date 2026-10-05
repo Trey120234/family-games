@@ -101,6 +101,8 @@ h1 {
   gap: 8px;
 }
 
+.hbtn:disabled { opacity: 0.45; }
+
 .hbtn {
   min-height: 48px;
   padding: 8px 6px;
@@ -148,7 +150,7 @@ h1 {
   max-width: 520px;
   max-height: 90%;
   overflow: auto;
-  padding: 22px 20px 22px;
+  padding: 22px 20px calc(22px + env(safe-area-inset-bottom, 0px));   /* clear of the iPhone home bar */
   border-radius: 20px 20px 0 0;
   background: var(--surface);
   color: var(--fg);
@@ -192,6 +194,25 @@ h1 {
 }
 
 /* Second-choice button, like "Keep playing" */
+/* The first big button in a long panel (like "Let's play" under How to play)
+   stays in view at the bottom while the text above it scrolls. */
+.panel > .big:first-of-type {
+  position: sticky;
+  bottom: 0;
+  box-shadow: 0 -12px 12px var(--surface);   /* soft fade so text doesn't peek behind it */
+}
+/* ...and covers the strip under it, so text never shows below the button */
+.panel > .big:first-of-type::after {
+  content: "";
+  position: absolute;
+  left: -20px;
+  right: -20px;
+  top: 100%;
+  height: 80px;
+  background: var(--surface);
+  pointer-events: none;
+}
+
 .big.alt {
   background: var(--key);
   color: var(--key-fg);

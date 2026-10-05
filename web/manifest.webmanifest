@@ -1,0 +1,14 @@
+{
+  "name": "Games",
+  "short_name": "Games",
+  "description": "Simple, large-print games: Word Garden, Word Grower, Mahjong and Solitaire.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef3ee",
+  "theme_color": "#eef3ee",
+  "icons": [
+    { "src": "shared/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "shared/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

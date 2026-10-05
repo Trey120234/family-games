@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- Lets iPhones (and Android browsers) add Games to the home screen as an app -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="shared/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Games">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#eef3ee" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141a16" media="(prefers-color-scheme: dark)">
   <title>Games</title>
   <!-- Shared fonts and colors first, then the home screen's own styles -->
   <link rel="stylesheet" href="shared/theme.css">
@@ -19,8 +28,8 @@
     <!-- The game cards are built by home.js from the list in games.js -->
     <div class="game-list" id="gameList"></div>
 
-    <!-- "Get the app" box. Shown only in a web browser on Android or a computer:
-         hidden inside the app itself, and on iPhones (the app file is Android-only). -->
+    <!-- "Get the app" box for Android phones and computers.
+         Hidden inside the app itself, and on iPhones (the app file is Android-only). -->
     <section class="get-app" id="getApp" hidden>
       <h2>Get the app</h2>
       <p>Install Games on an Android phone or tablet. It updates itself and works without internet.</p>
@@ -30,6 +39,21 @@
         <b>Downloading…</b> When it's done, open <b>Files → Downloads</b> and tap <b>Games.apk</b> to install.
       </p>
       <p class="get-app-note">After it downloads, open the file to install. Your phone may ask you to allow installs from your browser first.</p>
+    </section>
+
+    <!-- "Get the app" box for iPhones and iPads: they add the website to the home screen instead.
+         Hidden once Games has been opened from the home screen. -->
+    <section class="get-app" id="getAppIphone" hidden>
+      <h2>Put Games on your iPhone</h2>
+      <p>Add Games to your home screen. It opens like an app, updates itself and works without internet.</p>
+      <ol class="steps">
+        <li>Open this page in <b>Safari</b>, then tap the <b>Share</b> button
+          <!-- the iPhone share icon: a square with an arrow pointing up -->
+          <svg class="share-icon" viewBox="0 0 24 24" aria-label="Share button" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>.
+          If you don't see it, tap the <b>•••</b> button first.</li>
+        <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+        <li>Tap <b>Add</b>. Games is now on your home screen.</li>
+      </ol>
     </section>
   </main>
 

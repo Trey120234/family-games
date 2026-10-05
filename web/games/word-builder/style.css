@@ -36,7 +36,12 @@
 /* Size of one spot in the planter boxes. It shrinks on smaller
    screens so all 7 rows, the letters and the buttons fit. */
 :root {
-  --box: clamp(24px, min(calc((100vw - 84px) / 7), calc((100vh - 625px) / 7)), 46px);
+  --screen-h: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  --box: clamp(24px, min(calc((100vw - 84px) / 7), calc((var(--screen-h) - 625px) / 7)), 46px);
+}
+/* Newer browsers: use the part of the screen that's actually visible (iPhone Safari's toolbars) */
+@supports (height: 100dvh) {
+  :root { --screen-h: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ---------- The garden (hidden word rows) ---------- */
@@ -272,7 +277,7 @@
 /* ---------- Small screens and reduced motion ---------- */
 /* Shorter phones: all 7 pots on one line, so the garden has more room */
 @media (max-height: 820px) {
-  :root { --box: clamp(24px, min(calc((100vw - 84px) / 7), calc((100vh - 505px) / 7.3)), 46px); }
+  :root { --box: clamp(24px, min(calc((100vw - 84px) / 7), calc((var(--screen-h) - 505px) / 7.3)), 46px); }
   .letters { flex-wrap: nowrap; gap: 6px; padding-block: 8px 6px; }
   .letter { width: auto; flex: 1; height: 50px; font-size: 1.6rem; }
   .entry { --slot: min(40px, calc((100vw - 64px) / 7)); }

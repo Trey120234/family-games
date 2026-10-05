@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- Lets iPhones (and Android browsers) add Games to the home screen as an app -->
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../../shared/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Games">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#eef3ee" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141a16" media="(prefers-color-scheme: dark)">
   <title>Word Grower</title>
   <!-- Shared fonts and colors, then shared screen parts, then this game's own styles -->
   <link rel="stylesheet" href="../../shared/theme.css">

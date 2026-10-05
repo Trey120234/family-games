@@ -20,8 +20,8 @@ android {
         targetSdk 34
 
         // Raise versionCode by 1 for every update you send out.
-        versionCode 3
-        versionName "2.0"
+        versionCode 4
+        versionName "2.1"
     }
 
     signingConfigs {

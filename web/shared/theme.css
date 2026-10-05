@@ -64,8 +64,21 @@
 
 html, body { height: 100%; }
 
+/* Use the part of the screen that's actually visible (iPhone Safari's toolbars can cover 100%) */
+@supports (height: 100dvh) {
+  html, body { height: 100dvh; }
+}
+
+/* A quick double-tap never zooms the page */
+html { touch-action: manipulation; }
+
 body {
   margin: 0;
+  /* Keep everything clear of the notch and the bar at the bottom of newer iPhones */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-touch-callout: none;   /* no pop-up menu when holding a finger on a card or tile */
+  -webkit-user-select: none;     /* no text highlighting by accident */
+  user-select: none;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--body);

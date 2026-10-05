@@ -35,6 +35,14 @@ const GAMES = [
     statsKey: "mj-stats",
   },
 
+  {
+    name: "Solitaire",
+    description: "Move every card up to the four piles, Ace to King.",
+    folder: "games/solitaire",
+    icon: "icon.png",
+    statsKey: "so-stats",
+  },
+
   // Next game goes here, for example:
   // {
   //   name: "Number Puzzle",
