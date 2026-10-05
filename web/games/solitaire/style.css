@@ -78,6 +78,7 @@
 
 /* ---------- One card ---------- */
 .card {
+  touch-action: none;   /* a finger on a card drags it instead of scrolling the page */
   position: absolute;
   left: 0;
   top: 0;
@@ -86,7 +87,6 @@
   border-radius: calc(var(--cw) * 0.12);
   transition: left 0.18s ease, top 0.18s ease;
   cursor: pointer;
-  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
@@ -152,6 +152,13 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 2 C12 4 12 9 8 13 C4 9 4 4 8 2Z' fill='%23ffffff' fill-opacity='0.16'/%3E%3Cpath d='M8 3 L8 12.5' stroke='%23ffffff' stroke-opacity='0.22' stroke-width='0.7'/%3E%3C/svg%3E") center / 14px 14px,
     var(--back);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* A card being dragged: no sliding, and a bigger shadow so it looks lifted */
+.card.dragging {
+  transition: none;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.4);
+  cursor: grabbing;
 }
 
 /* The chosen card (and any cards on top of it) */

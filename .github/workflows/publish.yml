@@ -8,10 +8,7 @@
 name: Publish games
 
 on:
-  push:
-    branches: [main]
-    paths: ["web/**"]
-  workflow_dispatch:     # lets you run it by hand from the Actions tab
+  workflow_dispatch:     # publish only when I click "Run workflow" on GitHub
 
 permissions:
   contents: read

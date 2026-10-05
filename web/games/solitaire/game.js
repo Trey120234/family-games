@@ -192,6 +192,8 @@ document.addEventListener("visibilitychange", () => {
 
 // ---------- Drawing the table ----------
 // Works out card size from the space available, then places every card.
+let layout = { cw: 0, ch: 0, gap: 0, tabTop: 0 };   // card sizes from the last render (used for dragging)
+
 function render() {
   const W = table.clientWidth, H = table.clientHeight;
   const gap = Math.max(3, Math.round(W * 0.012));
@@ -204,7 +206,10 @@ function render() {
 
   const x = (col) => Math.round(col * (cw + gap));
   const tabTop = ch + Math.round(gap * 2.5);
+  layout = { cw, ch, gap, tabTop };
   const place = (el, left, top, z) => {
+    el.style.transform = "";            // put back any card that was being dragged
+    el.classList.remove("dragging");
     el.style.left = left + "px";
     el.style.top = top + "px";
     el.style.zIndex = z;
@@ -514,6 +519,7 @@ function tap(spot) {
 }
 
 table.addEventListener("click", (e) => {
+  if (Date.now() < ignoreClicksUntil) return;   // this "click" was really the end of a drag
   const cardEl = e.target.closest(".card");
   if (cardEl) {
     tap(locate(Number(cardEl.dataset.card)));
@@ -526,6 +532,81 @@ table.addEventListener("click", (e) => {
   else if (name.startsWith("found")) tap({ pile: "found", c: Number(name.slice(5)) });
   else tap({ pile: "tab", c: Number(name.slice(3)) });
 });
+
+
+// ---------- Dragging ----------
+// Besides tapping, cards can be dragged with a finger (or mouse) onto
+// another column or up to the piles at the top. A small movement first
+// tells a drag apart from a tap, so tapping still works the same.
+const DRAG_START_PX = 8;     // how far a finger moves before it counts as a drag
+let drag = null;             // { from, cards, startX, startY, pointerId, moving }
+let ignoreClicksUntil = 0;
+
+table.addEventListener("pointerdown", (e) => {
+  if (state.done || finishing || drag || (e.pointerType === "mouse" && e.button !== 0)) return;
+  const cardEl = e.target.closest(".card");
+  if (!cardEl) return;
+  const spot = locate(Number(cardEl.dataset.card));
+  if (!spot || spot.pile === "stock") return;
+  if (spot.pile === "tab" && !state.tab[spot.c][spot.i].up) return;   // face-down cards stay put
+  const from = pickSpot(spot);
+  if (!canPickUp(from)) return;
+  drag = { from, cards: cardsAt(from), startX: e.clientX, startY: e.clientY, pointerId: e.pointerId, moving: false };
+});
+
+table.addEventListener("pointermove", (e) => {
+  if (!drag || e.pointerId !== drag.pointerId) return;
+  const dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
+  if (!drag.moving) {
+    if (Math.hypot(dx, dy) < DRAG_START_PX) return;
+    // It's a drag: lift the card(s)
+    drag.moving = true;
+    selected = null;
+    say("");
+    render();
+    try { table.setPointerCapture(e.pointerId); } catch (err) { /* older browsers */ }
+    drag.cards.forEach((card) => cardEls[card].classList.add("dragging"));
+  }
+  e.preventDefault();
+  drag.cards.forEach((card, n) => {
+    cardEls[card].style.transform = `translate(${dx}px, ${dy}px)`;
+    cardEls[card].style.zIndex = 1000 + n;
+  });
+});
+
+function endDrag(e, cancelled) {
+  if (!drag || e.pointerId !== drag.pointerId) return;
+  const d = drag;
+  drag = null;
+  if (!d.moving) return;              // it was a tap - the click handler takes care of it
+  ignoreClicksUntil = Date.now() + 150;   // skip only the click that ends this drag
+  const dest = cancelled ? null : dropTarget(cardEls[d.cards[0]]);
+  if (dest && moveTo(d.from, dest)) {
+    say("");
+    afterMove();
+    return;
+  }
+  // Didn't fit: the card slides back
+  render();
+  if (dest && !(dest.pile === d.from.pile && dest.c === d.from.c)) {
+    say(`The ${cardName(d.cards[0])} can't go there`);
+  }
+}
+table.addEventListener("pointerup", (e) => endDrag(e, false));
+table.addEventListener("pointercancel", (e) => endDrag(e, true));
+
+// Which pile is under the middle of the dragged card?
+function dropTarget(el) {
+  const t = table.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const cx = r.left + r.width / 2 - t.left;
+  const cy = r.top + r.height / 2 - t.top;
+  const { cw, ch, gap, tabTop } = layout;
+  const col = Math.max(0, Math.min(6, Math.floor((cx + gap / 2) / (cw + gap))));
+  if (cy < tabTop - gap) {
+    return col >= 3 ? { pile: "found", c: col - 3 } : null;   // the top row: piles on the right
+  }
+  return { pile: "tab", c: col };
+}
 
 
 // ---------- Undo ----------
