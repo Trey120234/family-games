@@ -1,0 +1,198 @@
+/* =============================================================
+   Mahjong - styles for this game only.
+   Fonts and colors come from ../../shared/theme.css.
+   The top bar, buttons and panels come from ../../shared/ui.css.
+   ============================================================= */
+
+/* ---------- Tile colors ---------- */
+:root {
+  --tile-face: #fbf7ec;        /* ivory front of a tile */
+  --tile-face-blocked: #e6e0cf;/* a tile you can't use yet */
+  --tile-side: #c9b98f;        /* the visible edge that makes tiles look thick */
+  --tile-border: #b9ab84;
+  --suit-dots: #1f5fa8;        /* blue ink */
+  --suit-bamboo: #2f7d4f;      /* green ink */
+  --suit-chars: #b3362b;       /* red ink */
+  --suit-wind: #2b2b2b;        /* black characters */
+  --select: #c99a1c;           /* gold outline on the chosen tile */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tile-face: #ece6d6;
+    --tile-face-blocked: #bfb8a6;
+    --tile-side: #8c7f5c;
+    --tile-border: #7d7152;
+    --select: #e3b73a;
+  }
+}
+
+/* ---------- Timer / pairs left ---------- */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-block: 8px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer::before {
+  content: "Time ";
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.pairs-left { color: var(--muted); font-weight: 400; }
+
+/* ---------- The board ---------- */
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Its size and each tile's position are set by game.js.
+   "isolation" keeps the tiles' layer order inside the board, so pop-up
+   panels (How to play, Give up) always appear on top of the tiles. */
+.board {
+  position: relative;
+  isolation: isolate;
+}
+
+/* ---------- One tile ---------- */
+.tile {
+  position: absolute;
+  width: var(--tw, 48px);
+  height: var(--th, 62px);
+  padding: 0;
+  border: 1.5px solid var(--tile-border);
+  border-radius: 7px;
+  background: var(--tile-face);
+  /* the thick edge, then a soft shadow on the table */
+  box-shadow:
+    calc(var(--tw, 48px) * 0.08) calc(var(--tw, 48px) * 0.10) 0 var(--tile-side),
+    calc(var(--tw, 48px) * 0.10) calc(var(--tw, 48px) * 0.14) 5px rgba(0, 0, 0, 0.32);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, opacity 0.18s ease;
+}
+
+/* Tiles that can't be used yet are a little darker */
+.tile.blocked { background: var(--tile-face-blocked); }
+
+/* The tile she tapped first */
+.tile.selected {
+  border-color: var(--select);
+  outline: 3px solid var(--select);
+  outline-offset: -1px;
+  transform: translate(-2px, -3px);
+}
+
+/* Hint: the two tiles pulse */
+.tile.hint { animation: hintPulse 0.8s ease-in-out 3; outline: 3px solid var(--accent); outline-offset: -1px; }
+
+@keyframes hintPulse {
+  50% { transform: translateY(-4px); }
+}
+
+/* A pair being removed fades away */
+.tile.leaving { opacity: 0; transform: scale(0.85); pointer-events: none; }
+
+/* Tapped a tile that isn't free */
+.tile.nope { animation: nope 0.35s; }
+
+@keyframes nope {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.tile:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+
+/* ---------- What's drawn on a tile ---------- */
+.tile .face {
+  width: 86%;
+  height: 86%;
+  display: block;
+  pointer-events: none;
+}
+
+/* Ink colors used in the drawings */
+.ink-b { fill: var(--suit-dots); }
+.ink-g { fill: var(--suit-bamboo); }
+.ink-r { fill: var(--suit-chars); }
+.ink-k { fill: var(--suit-wind); }
+.paper { fill: var(--tile-face); }
+.tile.blocked .paper { fill: var(--tile-face-blocked); }
+
+/* White dragon frame */
+.frame { fill: none; stroke: var(--suit-dots); stroke-width: 2.6; }
+.frame.thin { stroke-width: 1.2; }
+
+/* Chinese characters (winds, dragons, the "characters" suit) */
+.cjk-text {
+  font-family: "Noto Sans CJK SC", "Noto Sans SC", "Noto Sans CJK TC", "Microsoft YaHei", "PingFang SC", "Hiragino Sans", sans-serif;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+/* Tiles you can't use yet: drawing slightly faded too */
+.tile.blocked .face { opacity: 0.78; }
+
+/* ---------- Undo / Shuffle ---------- */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-block: 8px 12px;
+}
+
+.ctrl {
+  min-height: 56px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--key);
+  color: var(--key-fg);
+  font: 700 1.15rem var(--body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.ctrl:active { filter: brightness(0.9); }
+.ctrl:disabled { opacity: 0.45; cursor: default; }
+.ctrl:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Shuffle glows when there are no moves left */
+.ctrl.needed {
+  background: var(--accent);
+  color: var(--on-tile);
+  animation: hintPulse 1s ease-in-out infinite;
+}
+
+/* ---------- Help panel example ---------- */
+.help-example {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  --tw: 48px;
+  --th: 62px;
+}
+
+.help-example .tile.demo { position: relative; cursor: default; }
+.help-plus { font-size: 1.6rem; font-weight: 700; color: var(--muted); }
+
+.new-best { font-weight: 700; color: var(--accent); }
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .tile, .tile.hint, .tile.nope, .ctrl.needed { animation: none; transition: none; }
+}

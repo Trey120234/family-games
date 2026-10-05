@@ -89,6 +89,12 @@ function showDownload() {
   $("getApp").hidden = insideApp || isApple;
 }
 
+// Phones often download without saying so - tell her it's happening
+// and where to find the file.
+$("downloadBtn").addEventListener("click", () => {
+  $("downloadStatus").hidden = false;
+});
+
 showHome();
 showDownload();
 

@@ -27,6 +27,14 @@ const GAMES = [
     statsKey: "wb-stats",
   },
 
+  {
+    name: "Mahjong",
+    description: "Match pairs of tiles to clear the board.",
+    folder: "games/mahjong",
+    icon: "icon.png",
+    statsKey: "mj-stats",
+  },
+
   // Next game goes here, for example:
   // {
   //   name: "Number Puzzle",

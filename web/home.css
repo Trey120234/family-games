@@ -161,6 +161,15 @@
 
 .get-app .get-app-note { font-size: 0.95rem; }
 
+/* "Downloading..." message under the button */
+.get-app .download-status {
+  padding: 12px 14px;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--fg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .game-card:active { transform: none; }
 }
