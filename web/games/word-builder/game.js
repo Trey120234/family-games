@@ -19,7 +19,7 @@ const WIN_TITLES = ["Puzzle solved!", "Well done!", "Wonderful!", "Great job!", 
 // (Different names from Word Garden, so the games don't mix up their stats.)
 const STATS_KEY = "wb-stats";   // played / solved / streak
 const GAME_KEY = "wb-game";     // the puzzle in progress
-const NEXT_KEY = "wb-next";     // which puzzle comes next
+const ROUND_KEY = "wb-round";   // this round's shuffled puzzle order, and how far along she is
 const SEEN_KEY = "wb-seen";     // has "How to play" been shown yet
 
 
@@ -362,18 +362,44 @@ function finish(won, gaveUp = false) {
   }, gaveUp ? 300 : 1000);
 }
 
-// Start the next puzzle in the list (back to the first after the last one).
+// Puzzles are played in "rounds": every puzzle once, in a random order.
+// When a round is finished, a new random order is dealt - like shuffling
+// a deck of cards - so she never gets the same puzzle twice in a row.
+function newRound(lastNumber) {
+  const order = shuffled(GOOD_PUZZLES.map((p, i) => i));
+  // Don't start the new round with the puzzle that ended the last one.
+  if (order.length > 1 && order[0] === lastNumber) {
+    [order[0], order[1]] = [order[1], order[0]];
+  }
+  return { order, next: 0 };
+}
+
 function nextPuzzle() {
-  const number = load(NEXT_KEY, 0) % GOOD_PUZZLES.length;
-  save(NEXT_KEY, (number + 1) % GOOD_PUZZLES.length);
+  let round = load(ROUND_KEY, null);
+
+  // Deal a new round if there isn't one yet, the round is used up,
+  // or puzzles.js has changed since this round was dealt.
+  const stillValid = round && Array.isArray(round.order) &&
+    round.order.length === GOOD_PUZZLES.length && round.next < round.order.length;
+  if (!stillValid) {
+    const last = state ? state.number : -1;
+    round = newRound(last);
+  }
+
+  const number = round.order[round.next];
+  round.next++;
+  save(ROUND_KEY, round);
+
   state = newState(number);
+  state.place = round.next;       // 1st, 2nd, 3rd... puzzle of this round
   $("endSheet").hidden = true;
   showStart();
   render();
 }
 
 function showStart() {
-  say(`Puzzle ${state.number + 1} of ${GOOD_PUZZLES.length}. Find all 7 words.`);
+  const place = state.place || state.number + 1;
+  say(`Puzzle ${place} of ${GOOD_PUZZLES.length}. Find all 7 words.`);
 }
 
 

@@ -27,11 +27,13 @@ async function saveAllFiles() {
   const list = await response.json();
   const cache = await caches.open(CACHE);
   await Promise.all(
-    list.files.map((file) =>
-      fetch(fresh(file), { cache: "no-store" })
-        .then((r) => (r.ok ? cache.put(file, r) : null))
-        .catch(() => null)
-    )
+    list.files
+      .filter((file) => !file.endsWith(".apk"))   // the app download isn't needed on the phone
+      .map((file) =>
+        fetch(fresh(file), { cache: "no-store" })
+          .then((r) => (r.ok ? cache.put(file, r) : null))
+          .catch(() => null)
+      )
   );
 }
 
@@ -55,6 +57,7 @@ self.addEventListener("message", (event) => {
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== location.origin) return;
+  if (request.url.split("?")[0].endsWith(".apk")) return;   // app downloads go straight to the website
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);

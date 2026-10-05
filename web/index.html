@@ -18,6 +18,15 @@
 
     <!-- The game cards are built by home.js from the list in games.js -->
     <div class="game-list" id="gameList"></div>
+
+    <!-- "Get the app" box. Shown only in a web browser on Android or a computer:
+         hidden inside the app itself, and on iPhones (the app file is Android-only). -->
+    <section class="get-app" id="getApp" hidden>
+      <h2>Get the app</h2>
+      <p>Install Games on an Android phone or tablet. It updates itself and works without internet.</p>
+      <a class="download-btn" href="download/Games.apk" download>Download for Android</a>
+      <p class="get-app-note">After it downloads, open the file to install. Your phone may ask you to allow installs from your browser first.</p>
+    </section>
   </main>
 
   <!-- games.js must load before home.js -->

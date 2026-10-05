@@ -78,7 +78,19 @@ function showHome() {
   list.appendChild(makeComingSoon());
 }
 
+// Shows the "Get the app" box only where the download makes sense:
+// not inside the app itself (Android marks it with "; wv)"), and not on
+// iPhones or iPads, which can't install Android apps.
+function showDownload() {
+  const agent = navigator.userAgent;
+  const insideApp = /; wv\)/.test(agent);
+  const isApple = /iPhone|iPad|iPod/.test(agent) ||
+    (/Macintosh/.test(agent) && navigator.maxTouchPoints > 1);   // newer iPads
+  $("getApp").hidden = insideApp || isApple;
+}
+
 showHome();
+showDownload();
 
 // Coming back from a game: refresh the stats line (e.g. a new streak).
 window.addEventListener("pageshow", showHome);

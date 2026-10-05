@@ -118,6 +118,49 @@
   color: var(--muted);
 }
 
+/* ---------- "Get the app" box (website only) ---------- */
+.get-app {
+  padding-block: 20px 4px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.get-app h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: var(--fg);
+}
+
+.get-app p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.download-btn {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--on-tile);
+  font: 700 1.25rem var(--body);
+  text-decoration: none;
+}
+
+.download-btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.get-app .get-app-note { font-size: 0.95rem; }
+
 @media (prefers-reduced-motion: reduce) {
   .game-card:active { transform: none; }
 }
