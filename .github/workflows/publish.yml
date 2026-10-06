@@ -9,7 +9,12 @@ name: Publish games
 
 on:
   workflow_dispatch:     # publish only when I click "Run workflow" on GitHub
-  run-name: ${{ inputs.note || 'Publish games' }}
+    inputs:
+      note:
+        description: "What changed? (this becomes the run's name)"
+        required: false
+
+run-name: ${{ inputs.note || 'Publish games' }}
 
 permissions:
   contents: read
