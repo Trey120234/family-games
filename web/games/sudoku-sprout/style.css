@@ -1,0 +1,241 @@
+/* =============================================================
+   Sudoku Sprout - styles for this game only.
+   Fonts and colors come from ../../shared/theme.css.
+   The top bar, buttons and panels come from ../../shared/ui.css.
+   The board's size is set by game.js to fit the screen.
+   ============================================================= */
+
+/* ---------- Colors ---------- */
+:root {
+  --paper: #fffdf6;          /* the grid's background */
+  --thin: #cfd8cf;           /* lines between squares */
+  --thick: #2f7d4f;          /* lines around the 3x3 boxes */
+  --given: #1f2a24;          /* numbers that came with the puzzle */
+  --mine: #2f7d4f;           /* numbers you put in: sprout green */
+  --wrong: #c62828;          /* a number that can't be right */
+  --wrong-bg: #fde4e1;
+  --selected: #f5c49d;       /* the square you've picked: clay pot */
+  --peer: #fbefe5;           /* same row, column or box */
+  --same: #f6dcc7;           /* the same number elsewhere */
+  --note: #44514a;           /* small reminder numbers */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #1b231e;
+    --thin: #34423a;
+    --thick: #5cb882;
+    --given: #eef3ee;
+    --mine: #7dd6a0;
+    --wrong: #ff8a80;
+    --wrong-bg: #4a2220;
+    --selected: #6e4428;
+    --peer: #2c2420;
+    --same: #4c3527;
+    --note: #c0ccc4;
+  }
+}
+
+/* ---------- Level and timer ---------- */
+.level-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+}
+.seg { flex: 1; display: flex; gap: 5px; }
+.seg button {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 2px;
+  line-height: 1.05;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--fg);
+  font: 700 0.95rem var(--body);
+  cursor: pointer;
+}
+.seg { gap: 4px; }
+.seg button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--on-tile); }
+.seg button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.timer { flex: none; font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.msg { min-height: 2em; padding-block: 2px; }
+
+/* ---------- The board ---------- */
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board {
+  position: relative;
+  width: var(--size, 320px);
+  height: var(--size, 320px);
+  display: grid;
+  grid-template-columns: repeat(var(--n, 9), 1fr);
+  grid-template-rows: repeat(var(--n, 9), 1fr);
+  border: 3px solid var(--thick);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--thin);
+  border-bottom: 1px solid var(--thin);
+  background: transparent;
+  color: var(--mine);
+  font: 700 calc(var(--size, 320px) / var(--n, 9) * var(--fs, 0.62)) / 1 var(--body);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.cell.last-col { border-right: 0; }
+.cell.last-row { border-bottom: 0; }
+/* Bigger grids get relatively bigger numbers; the 4 x 4 squares are huge already */
+.board.n6 { --fs: 0.56; }
+.board.n4 { --fs: 0.48; }
+.cell.box-right { border-right: 3px solid var(--thick); }
+.cell.box-bottom { border-bottom: 3px solid var(--thick); }
+
+.cell.given { color: var(--given); }
+.cell.peer { background: var(--peer); }
+.cell.same { background: var(--same); }
+.cell.selected { background: var(--selected); }
+.cell.wrong { color: var(--wrong); background: var(--wrong-bg); text-decoration: underline wavy 2px; text-underline-offset: 3px; }
+.cell.selected.wrong { box-shadow: inset 0 0 0 3px var(--wrong); }
+.cell:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+
+/* Small reminder numbers: a 3 x 3 pattern inside the square */
+.notes {
+  position: absolute;
+  inset: 1px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  color: var(--note);
+  font: 700 calc(var(--size, 320px) / 9 * 0.32) / 1 var(--body);
+}
+/* Notes layout: 2 x 2 for numbers 1-4, 3 across x 2 down for 1-6 */
+.board.n4 .notes { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); inset: 8%; font-size: calc(var(--size, 320px) / 4 * 0.28); }
+.board.n6 .notes { grid-template-rows: repeat(2, 1fr); inset: 10% 4%; font-size: calc(var(--size, 320px) / 6 * 0.3); }
+.notes span { display: flex; align-items: center; justify-content: center; }
+
+/* A hint just filled this square */
+.cell.hinted { animation: sprout 0.6s ease-out; }
+@keyframes sprout { 0% { transform: scale(0.4); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+/* Solved: a green wave across the board */
+.cell.bloom { animation: bloom 0.7s ease-out both; }
+@keyframes bloom { 40% { background: #9fd8a8; transform: scale(1.06); } 100% { background: transparent; transform: scale(1); } }
+
+/* ---------- Numbers 1-9 ---------- */
+.pad {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 9), 1fr);
+  gap: 4px;
+  padding-top: 10px;
+}
+.num {
+  min-height: 58px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--key);
+  color: var(--key-fg);
+  font: 700 1.7rem var(--body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.num:active { filter: brightness(0.9); }
+.num:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.num.done { opacity: 0.3; }                       /* all nine of this number are placed */
+.pad.notes-mode .num {                            /* notes are on: smaller, outlined numbers */
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  color: var(--accent);
+  font-size: 1.25rem;
+}
+
+/* ---------- Undo / Erase / Notes ---------- */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding-block: 8px 12px;
+}
+.ctrl {
+  min-height: 54px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--key);
+  color: var(--key-fg);
+  font: 700 1.1rem var(--body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.ctrl:active { filter: brightness(0.9); }
+.ctrl:disabled { opacity: 0.45; cursor: default; }
+.ctrl:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ctrl[aria-pressed="true"] { background: var(--accent); color: var(--on-tile); }
+.onoff { font-size: 0.85rem; font-weight: 700; opacity: 0.85; }
+
+.new-best { font-weight: 700; color: var(--accent); }
+
+/* ---------- Small screens and reduced motion ---------- */
+/* Narrow phones: smaller level names so all four fit */
+@media (max-width: 359px) {
+  .seg button { font-size: 0.8rem; }
+  .level-row { gap: 6px; }
+}
+
+@media (max-height: 700px) {
+  .num { min-height: 50px; font-size: 1.5rem; }
+  .ctrl { min-height: 46px; }
+  .seg button { min-height: 38px; }
+}
+
+/* Phone turned sideways: board on the left, numbers and buttons on the right */
+@media (orientation: landscape) and (max-height: 540px) {
+  .app {
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-areas:
+      "head  head"
+      "board level"
+      "board msg"
+      "board pad"
+      "board controls";
+    column-gap: 16px;
+  }
+  header { grid-area: head; flex-direction: row; align-items: center; justify-content: space-between; padding-block: 6px; }
+  header .header-buttons { flex: 1; max-width: 420px; }
+  .level-row { grid-area: level; }
+  .msg { grid-area: msg; min-height: 1.5em; }
+  .board-wrap { grid-area: board; padding-block: 8px; align-items: flex-start; }
+  .pad { grid-area: pad; grid-template-columns: repeat(5, 1fr); align-content: center; padding-top: 4px; }
+  .pad.n6 { grid-template-columns: repeat(3, 1fr); }
+  .pad.n4 { grid-template-columns: repeat(4, 1fr); }
+  .num { min-height: 46px; font-size: 1.5rem; }
+  .controls { grid-area: controls; padding-block: 6px 8px; }
+  .ctrl { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell.hinted, .cell.bloom { animation: none; }
+}

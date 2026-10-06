@@ -43,6 +43,14 @@ const GAMES = [
     statsKey: "so-stats",
   },
 
+  {
+    name: "Sudoku Sprout",
+    description: "Number puzzles, from a quick 4x4 up to a full 9x9 grid.",
+    folder: "games/sudoku-sprout",
+    icon: "icon.png",
+    statsKey: "ss-stats",
+  },
+
   // Next game goes here, for example:
   // {
   //   name: "Number Puzzle",

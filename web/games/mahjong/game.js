@@ -18,6 +18,7 @@ const TILE_RATIO = 1.3;
 const STATS_KEY = "mj-stats";   // played / cleared / streak / best time
 const GAME_KEY = "mj-game";     // the board in progress
 const SEEN_KEY = "mj-seen";     // has "How to play" been shown yet
+const NEXT_KEY = "mj-next";     // which board shape comes next (see LAYOUT_ORDER in layouts.js)
 
 
 // ---------- The tiles ----------
@@ -229,10 +230,19 @@ let state;
 let stats = load(STATS_KEY, { played: 0, won: 0, streak: 0, best: null });
 let selected = null;   // the tile she tapped first, if any
 
+// The next board shape in LAYOUT_ORDER (layouts.js), so each new board looks different.
+function nextLayout() {
+  const order = LAYOUT_ORDER.filter((name) => LAYOUTS[name]);
+  const n = Number(load(NEXT_KEY, 0)) || 0;
+  save(NEXT_KEY, (n + 1) % order.length);
+  return order[n % order.length];
+}
+
 function newState() {
+  const layout = nextLayout();
   return {
-    layout: DEFAULT_LAYOUT,
-    tiles: newBoard(DEFAULT_LAYOUT),
+    layout,
+    tiles: newBoard(layout),
     history: [],
     elapsed: 0,
     done: false,
@@ -472,8 +482,17 @@ function shuffleTiles() {
   const kindPairs = [];
   for (let n = 0; n < kinds.length; n += 2) kindPairs.push(kinds[n]);
 
+  // Try many shuffles. If the tiles left can't be cleared in ANY order
+  // because of where they sit (say, the last two are stacked on each other),
+  // lay them out flat in rows instead - flat tiles can always be cleared.
   let pairs = null;
-  while (!pairs) pairs = planPairs(state.tiles, here);
+  for (let tries = 0; tries < 300 && !pairs; tries++) pairs = planPairs(state.tiles, here);
+  let laidFlat = false;
+  if (!pairs) {
+    layFlat(here);
+    laidFlat = true;
+    pairs = planPairs(state.tiles, here);
+  }
   assignKinds(state.tiles, pairs, kindPairs);
 
   // Undo can't go back past a shuffle.
@@ -481,7 +500,21 @@ function shuffleTiles() {
   selected = null;
   render();
   checkStuck();
-  say("Tiles shuffled");
+  say(laidFlat ? "Tiles shuffled and laid out flat" : "Tiles shuffled");
+}
+
+// Moves the given tiles onto the table in centered rows of up to 7.
+function layFlat(indexes) {
+  const perRow = 7;
+  const rows = Math.ceil(indexes.length / perRow);
+  indexes.forEach((tileIndex, n) => {
+    const row = Math.floor(n / perRow);
+    const inRow = Math.min(perRow, indexes.length - row * perRow);
+    const t = state.tiles[tileIndex];
+    t.z = 0;
+    t.x = (perRow - inRow) + (n % perRow) * 2;   // half-tile steps, centered
+    t.y = (6 - rows) + row * 2;
+  });
 }
 
 
@@ -532,7 +565,7 @@ function finish(won, gaveUp = false) {
       ? WIN_TITLES[Math.floor(Math.random() * WIN_TITLES.length)]
       : "No worries";
     $("endText").textContent = won
-      ? `You cleared the board in ${formatTime(state.elapsed)}.`
+      ? `You cleared the ${LAYOUTS[state.layout].name} in ${formatTime(state.elapsed)}.`
       : "Here's a fresh board whenever you're ready.";
     $("newBest").hidden = !newBest;
     $("sPlayed").textContent = stats.played;
@@ -549,7 +582,7 @@ function newGame() {
   $("endSheet").hidden = true;
   $("shuffleBtn").classList.remove("needed");
   lastTick = Date.now();
-  say("Tap two matching tiles to remove them");
+  say(`New board: ${LAYOUTS[state.layout].name}. Tap two matching tiles to remove them`);
   render();
 }
 
