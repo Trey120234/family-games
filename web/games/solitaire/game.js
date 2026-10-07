@@ -93,7 +93,7 @@ function cardFace(card) {
 let state;
 // best = best time turning 3 cards, best1 = best time turning 1 card
 let stats = load(STATS_KEY, { played: 0, won: 0, streak: 0, best: 0, best1: 0 });
-let drawChoice = load(DRAW_KEY, 3) === 1 ? 1 : 3;   // what the next deal uses
+let drawChoice = load(DRAW_KEY, 3) === 1 ? 1 : 3;   // what the next game uses
 let selected = null;   // the card she has picked up: { pile, c, i } or null
 let finishing = false; // true while Finish is playing the last cards
 
@@ -275,15 +275,15 @@ function render() {
   $("moves").textContent = `${state.moves} ${state.moves === 1 ? "move" : "moves"}`;
   // While Finish is playing the cards, the other buttons wait.
   $("undoBtn").disabled = state.done || finishing || state.undo.length === 0;
-  // The switch shows this game's setting. If the next deal will use the other
-  // one, that button gets a dashed outline marked "next deal".
+  // The switch shows this game's setting. If the next game will use the other
+  // one, that button gets a dashed outline marked "next game".
   $("turnPick").querySelectorAll("button").forEach((x) => {
     const n = Number(x.dataset.n);
     const now = n === state.draw;
     const next = !now && n === drawChoice;
     x.setAttribute("aria-pressed", now);
     x.classList.toggle("next", next);
-    x.setAttribute("aria-label", `Turn ${n} card${n === 1 ? "" : "s"}${now ? " (this game)" : next ? " (next deal)" : ""}`);
+    x.setAttribute("aria-label", `Turn ${n} card${n === 1 ? "" : "s"}${now ? " (this game)" : next ? " (next game)" : ""}`);
   });
   $("giveUpBtn").disabled = finishing;
   const canFinish = !state.done && !finishing && canAutoFinish(state) && totalOnFoundations(state) < 52;
@@ -767,19 +767,19 @@ $("helpClose").onclick = () => { $("helpSheet").hidden = true; lastTick = Date.n
 $("againBtn").onclick = newGame;
 
 // Turn 1 / Turn 3. Before the first move it changes this deal right away;
-// after that it's saved for the next deal.
+// after that it's saved for the next game.
 function chooseDraw(n) {
   if (n !== 1 && n !== 3) return;
   drawChoice = n;
   save(DRAW_KEY, n);
   if (state.done) {
-    say(`Next deal: turn ${n === 1 ? "1 card" : "3 cards"}`);
+    say(`Next game: turn ${n === 1 ? "1 card" : "3 cards"}`);
   } else if (state.moves === 0) {
     state.draw = n;
     saveGame();
     say(n === 1 ? "Turning over 1 card at a time" : "Turning over 3 cards at a time");
   } else if (state.draw !== n) {
-    say(`Next deal: turn ${n === 1 ? "1 card" : "3 cards"}`);
+    say(`Next game: turn ${n === 1 ? "1 card" : "3 cards"}`);
   } else {
     say("");
   }
