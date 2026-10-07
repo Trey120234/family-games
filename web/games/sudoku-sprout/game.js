@@ -74,7 +74,7 @@ function setSize(n) {
 
 // Works out the answer to a puzzle (each puzzle has exactly one).
 function solve(puzzle) {
-  if (sizeOf(puzzle) !== N) setSize(sizeOf(puzzle));
+  if (sizeOf(puzzle) !== N || PEERS.length !== N * N) setSize(sizeOf(puzzle));   // make sure the grid is set up for this size
   const g = puzzle.split("").map(Number);
   function options(i) {
     const used = new Set(PEERS[i].map((p) => g[p]));
