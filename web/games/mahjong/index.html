@@ -16,6 +16,7 @@
   <!-- Shared fonts and colors, then shared screen parts, then this game's own styles -->
   <link rel="stylesheet" href="../../shared/theme.css">
   <link rel="stylesheet" href="../../shared/ui.css">
+  <link rel="stylesheet" href="../../shared/coins.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -43,7 +44,7 @@
 
       <!-- Second line: the three buttons -->
       <div class="header-buttons">
-        <button class="hbtn" id="hintBtn" type="button">Hint</button>
+        <button class="hbtn" id="hintBtn" type="button" data-cost="hint">Hint</button>
         <button class="hbtn" id="giveUpBtn" type="button">Give up</button>
         <button class="hbtn" id="helpBtn" type="button" aria-label="How to play">Help</button>
       </div>
@@ -81,8 +82,9 @@
         <div class="tile demo" data-demo="dots-5"></div>
       </div>
       <p>You can only use a tile that is <b>free</b>: nothing on top of it, and nothing touching its left <b>or</b> right side. Tiles you can't use yet look a little darker.</p>
-      <p>Stuck? <b>Hint</b> shows a matching pair, <b>Shuffle</b> mixes the tiles, and <b>Undo</b> takes back your last pair. Every board can be cleared.</p>
+      <p>Stuck? <b>Hint</b> shows a matching pair for 1 coin, <b>Shuffle</b> mixes the tiles, and <b>Undo</b> takes back your last pair. Every board can be cleared.</p>
       <p>Each new board is a different shape: Pyramid, Diamond, Castle, Bridge and Flower.</p>
+      <p>Coins are shared by all the games. Tap the coin button at the top to see how many you have or add more.</p>
       <button class="big" id="helpClose" type="button">Let's play</button>
     </div>
   </div>
@@ -111,6 +113,9 @@
       <button class="big" id="againBtn" type="button">New board</button>
     </div>
   </div>
+
+  <!-- The coin wallet shared by all games (coin button at the top, Add coins panel) -->
+  <script src="../../shared/coins.js"></script>
 
   <!-- layouts.js must load before game.js -->
   <script src="layouts.js"></script>

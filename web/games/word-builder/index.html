@@ -16,6 +16,7 @@
   <!-- Shared fonts and colors, then shared screen parts, then this game's own styles -->
   <link rel="stylesheet" href="../../shared/theme.css">
   <link rel="stylesheet" href="../../shared/ui.css">
+  <link rel="stylesheet" href="../../shared/coins.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -43,7 +44,7 @@
 
       <!-- Second line: the three buttons -->
       <div class="header-buttons">
-        <button class="hbtn" id="hintBtn" type="button">Hint</button>
+        <button class="hbtn" id="hintBtn" type="button" data-cost="hint">Hint</button>
         <button class="hbtn" id="giveUpBtn" type="button">Give up</button>
         <button class="hbtn" id="helpBtn" type="button" aria-label="How to play">Help</button>
       </div>
@@ -78,7 +79,8 @@
       <p>There are 7 hidden words: three with 4 letters, two with 5, one with 6, and one with 7.</p>
       <p>Spell them using the seeds at the bottom. Tap the seeds in order to plant them in the pots, then tap <b>Enter</b>. Each seed can be used once per word.</p>
       <p>Found words bloom into <b>orange flowers</b>. Find all 7 to finish the puzzle.</p>
-      <p>Tap <b>Mix</b> to shuffle the seeds, or <b>Hint</b> to show one letter.</p>
+      <p>Tap <b>Mix</b> to shuffle the seeds, or <b>Hint</b> to show one letter for 1 coin.</p>
+      <p>Coins are shared by all the games. Tap the coin button at the top to see how many you have or add more.</p>
       <button class="big" id="helpClose" type="button">Let's play</button>
     </div>
   </div>
@@ -107,6 +109,9 @@
       <button class="big" id="nextBtn" type="button">Next puzzle</button>
     </div>
   </div>
+
+  <!-- The coin wallet shared by all games (coin button at the top, Add coins panel) -->
+  <script src="../../shared/coins.js"></script>
 
   <!-- puzzles.js must load before game.js -->
   <script src="puzzles.js"></script>

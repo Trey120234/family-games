@@ -304,6 +304,7 @@ function hint() {
   if (state.done) return;
   const r = state.found.findIndex((f) => !f);
   if (r === -1) return;
+  if (!Coins.spend(Coins.HINT_COST, "hint")) return;   // a hint costs a coin
 
   state.hints[r]++;
   const word = puzzle().rows[r];

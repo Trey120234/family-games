@@ -203,7 +203,7 @@ function buildBoard() {
 let lastTick = Date.now();
 
 function timerRunning() {
-  const panelOpen = !$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden;
+  const panelOpen = !$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden || Coins.isOpen();
   return state && !state.done && document.visibilityState === "visible" && !panelOpen;
 }
 
@@ -413,6 +413,7 @@ function hint() {
     open.sort((a, b) => choices(a) - choices(b));
     i = open[0];
   }
+  if (!Coins.spend(Coins.HINT_COST, "hint")) return;   // a hint costs a coin
   remember();
   const d = state.solution[i];
   state.grid[i] = d;
@@ -555,7 +556,7 @@ document.addEventListener("keydown", (e) => {
     else if (!$("giveUpSheet").hidden) $("giveUpNo").click();
     return;
   }
-  if (!$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden) return;
+  if (!$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden || Coins.isOpen()) return;
   if (/^[1-9]$/.test(e.key)) { if (Number(e.key) <= N) enter(Number(e.key)); }
   else if (e.key === "Backspace" || e.key === "Delete" || e.key === "0") erase();
   else if (e.key === "n" || e.key === "N") toggleNotes();

@@ -16,6 +16,7 @@
   <!-- Shared fonts and colors, then shared screen parts, then this game's own styles -->
   <link rel="stylesheet" href="../../shared/theme.css">
   <link rel="stylesheet" href="../../shared/ui.css">
+  <link rel="stylesheet" href="../../shared/coins.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -79,6 +80,7 @@
       <p>In the 7 columns, a card can go on one that is <b>one higher</b> and the <b>other color</b>, like a red 6 on a black 7. Only a <b>King</b> can go in an empty column.</p>
       <p>Tap the <b>deck</b> at the top left to turn over 3 new cards. Only the top one can be played. When the deck runs out, tap it to start it again.</p>
       <p>Stuck? <b>Undo</b> takes back your last move. Every deal can be won.</p>
+      <p>Coins are shared by all the games. Tap the coin button at the top to see how many you have or add more.</p>
       <button class="big" id="helpClose" type="button">Let's play</button>
     </div>
   </div>
@@ -107,6 +109,9 @@
       <button class="big" id="againBtn" type="button">Deal new cards</button>
     </div>
   </div>
+
+  <!-- The coin wallet shared by all games (coin button at the top, Add coins panel) -->
+  <script src="../../shared/coins.js"></script>
 
   <!-- rules.js and deals.js must load before game.js -->
   <script src="rules.js"></script>

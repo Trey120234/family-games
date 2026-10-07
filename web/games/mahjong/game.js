@@ -286,7 +286,7 @@ const message = $("msg");
 let lastTick = Date.now();
 
 function timerRunning() {
-  const panelOpen = !$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden;
+  const panelOpen = !$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden || Coins.isOpen();
   return state && !state.done && document.visibilityState === "visible" && !panelOpen;
 }
 
@@ -456,6 +456,9 @@ function hint() {
     checkStuck();
     return;
   }
+  // Already showing this pair? Don't charge again.
+  const showing = match.every((i) => tileEl(i).classList.contains("hint"));
+  if (!showing && !Coins.spend(Coins.HINT_COST, "hint")) return;   // a hint costs a coin
   selected = null;
   render();
   for (const i of match) tileEl(i).classList.add("hint");

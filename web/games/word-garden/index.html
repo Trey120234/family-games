@@ -16,6 +16,7 @@
   <!-- Shared fonts and colors, then shared screen parts, then this game's own styles -->
   <link rel="stylesheet" href="../../shared/theme.css">
   <link rel="stylesheet" href="../../shared/ui.css">
+  <link rel="stylesheet" href="../../shared/coins.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -54,7 +55,7 @@
 
       <!-- Second line: the three buttons -->
       <div class="header-buttons">
-        <button class="hbtn" id="hintBtn" type="button">Hint</button>
+        <button class="hbtn" id="hintBtn" type="button" data-cost="hint">Hint</button>
         <button class="hbtn" id="giveUpBtn" type="button">Give up</button>
         <button class="hbtn" id="helpBtn" type="button" aria-label="How to play">Help</button>
       </div>
@@ -104,7 +105,8 @@
         <div><span class="help-pic" id="helpBud"></span><span><b>Blue bud</b> - in the word, wrong spot</span></div>
         <div><span class="help-pic" id="helpStone"></span><span><b>Gray stone</b> - not in the word</span></div>
       </div>
-      <p>Stuck? Tap <b>Hint</b> to show one letter.</p>
+      <p>Stuck? Tap <b>Hint</b> to show one letter for 1 coin.</p>
+      <p>Coins are shared by all the games. Tap the coin button at the top to see how many you have or add more.</p>
       <button class="big" id="helpClose" type="button">Let's play</button>
     </div>
   </div>
@@ -133,6 +135,9 @@
       <button class="big" id="againBtn" type="button">Plant a new word</button>
     </div>
   </div>
+
+  <!-- The coin wallet shared by all games (coin button at the top, Add coins panel) -->
+  <script src="../../shared/coins.js"></script>
 
   <!-- words.js must load before game.js -->
   <script src="words.js"></script>

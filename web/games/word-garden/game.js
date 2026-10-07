@@ -385,6 +385,7 @@ function hint() {
     say("You already have every letter!");
     return;
   }
+  if (!Coins.spend(Coins.HINT_COST, "hint")) return;   // a hint costs a coin
   const i = open[Math.floor(Math.random() * open.length)];
   state.hints.push(i);
   saveGame();
@@ -476,7 +477,7 @@ $("lenPick").addEventListener("click", (e) => {
 // A real keyboard works too (handy when testing on a computer).
 document.addEventListener("keydown", (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
-  if (!$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden) return;
+  if (!$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden || Coins.isOpen()) return;
   if (e.key === "Enter") press("enter");
   else if (e.key === "Backspace") press("back");
   else if (/^[a-z]$/i.test(e.key)) press(e.key.toLowerCase());

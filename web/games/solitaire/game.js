@@ -160,7 +160,7 @@ function buildTable() {
 let lastTick = Date.now();
 
 function timerRunning() {
-  const panelOpen = !$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden;
+  const panelOpen = !$("helpSheet").hidden || !$("giveUpSheet").hidden || !$("endSheet").hidden || Coins.isOpen();
   return state && !state.done && document.visibilityState === "visible" && !panelOpen;
 }
 

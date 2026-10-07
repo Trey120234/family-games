@@ -196,6 +196,11 @@
 .new-best { font-weight: 700; color: var(--accent); }
 
 /* ---------- Small screens and reduced motion ---------- */
+/* The smallest phones: a smaller title so "Sudoku Sprout" isn't cut off */
+@media (max-width: 340px) {
+  h1 { font-size: 1.1rem; }
+}
+
 /* Narrow phones: smaller level names so all four fit */
 @media (max-width: 359px) {
   .seg button { font-size: 0.8rem; }
