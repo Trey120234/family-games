@@ -112,9 +112,11 @@ const POT =
   `<circle cx="22" cy="70.6" r="0.9" fill="var(--soil)"/><circle cx="37" cy="71.3" r="0.8" fill="var(--soil)"/>`;
 
 function letterText(letter, y, size, color) {
+  // Only ever draw a single plain letter A-Z (anything else is left blank)
+  const safe = /^[a-z]$/i.test(String(letter)) ? String(letter).toUpperCase() : "";
   return `<text x="30" y="${y}" text-anchor="middle" dominant-baseline="central" ` +
     `font-family="Atkinson Hyperlegible, Segoe UI, Arial, sans-serif" font-weight="700" ` +
-    `font-size="${size}" fill="${color}">${letter.toUpperCase()}</text>`;
+    `font-size="${size}" fill="${color}">${safe}</text>`;
 }
 
 function stem(top) {
@@ -504,13 +506,18 @@ buildKeyboard();
 showStreak();
 
 const savedGame = load(GAME_KEY, null);
-if (savedGame && !savedGame.done && typeof savedGame.answer === "string") {
+if (savedGame && !savedGame.done && typeof savedGame.answer === "string" && /^[a-z]{4,6}$/.test(savedGame.answer)) {
   state = savedGame;
   // Games saved before the garden update: always 5 letters, and old ones used "cur".
   state.n = state.answer.length;
   if (typeof state.current !== "string") state.current = state.cur || "";
   if (!Array.isArray(state.rows)) state.rows = [];
   if (!Array.isArray(state.hints)) state.hints = [];
+  // Keep only guesses and hints that make sense (a damaged or edited save can't break the page)
+  const word = new RegExp(`^[a-z]{${state.n}}$`);
+  state.rows = state.rows.filter((g) => typeof g === "string" && word.test(g)).slice(0, TRIES[state.n] || 7);
+  state.current = /^[a-z]*$/.test(state.current) ? state.current.slice(0, state.n) : "";
+  state.hints = state.hints.filter((i) => Number.isInteger(i) && i >= 0 && i < state.n);
 } else {
   state = newState();
 }
