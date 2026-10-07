@@ -14,7 +14,7 @@
 //    tab   - 7 columns, each a list of { card, up } from bottom to top
 // =============================================================
 
-const DRAW_COUNT = 3;   // cards turned over each time the deck is tapped
+const DRAW_COUNT = 3;   // cards turned over each time the deck is tapped (unless the game says 1)
 
 const suitOf = (card) => Math.floor(card / 13);
 const rankOf = (card) => (card % 13) + 1;
@@ -77,14 +77,16 @@ function flipTop(column) {
   return false;
 }
 
-// Tap the deck: turn over up to 3 cards, or put the used cards back when it's empty.
+// Tap the deck: turn over up to 3 cards (or 1, if the player picked "Turn 1"),
+// or put the used cards back when it's empty.
 function drawCards(state) {
   if (state.stock.length === 0) {
     state.stock = state.waste.reverse();
     state.waste = [];
     return;
   }
-  for (let n = 0; n < DRAW_COUNT && state.stock.length; n++) state.waste.push(state.stock.pop());
+  const count = state.draw === 1 ? 1 : DRAW_COUNT;
+  for (let n = 0; n < count && state.stock.length; n++) state.waste.push(state.stock.pop());
 }
 
 const totalOnFoundations = (state) => state.found.reduce((sum, pile) => sum + pile.length, 0);

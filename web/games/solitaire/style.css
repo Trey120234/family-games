@@ -48,6 +48,26 @@
 .timer::before { content: "Time "; font-weight: 400; color: var(--muted); }
 .moves { color: var(--muted); font-weight: 400; }
 
+/* Turn 1 / Turn 3 switch */
+.turn-pick { display: flex; align-items: center; gap: 4px; }
+.turn-label { font-weight: 400; color: var(--muted); margin-right: 2px; }
+.turn-pick button {
+  min-width: 40px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--fg);
+  font: 700 1.05rem var(--body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.turn-pick button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--on-tile); }
+.turn-pick button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* The setting the NEXT deal will use (picked in the middle of a game) */
+.turn-pick button.next { border-style: dashed; border-color: var(--accent); color: var(--accent); }
+
 .msg { min-height: 2em; padding-block: 2px; }
 
 /* ---------- The table ---------- */

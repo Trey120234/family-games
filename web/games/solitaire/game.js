@@ -24,6 +24,7 @@ const STATS_KEY = "so-stats";     // played / won / streak / best time
 const GAME_KEY = "so-game";       // the deal in progress
 const RECENT_KEY = "so-recent";   // deals played lately, so they don't repeat soon
 const SEEN_KEY = "so-seen";       // has "How to play" been shown yet
+const DRAW_KEY = "so-draw";       // Turn 1 or Turn 3: how many cards the deck turns over
 
 
 // ---------- Saving to the phone ----------
@@ -88,8 +89,11 @@ function cardFace(card) {
 // state.elapsed - time played, in milliseconds
 // state.undo    - earlier copies of the table, for the Undo button
 // state.done    - true once the game is won or given up
+// state.draw    - 1 or 3: how many cards the deck turns over each tap
 let state;
-let stats = load(STATS_KEY, { played: 0, won: 0, streak: 0, best: 0 });
+// best = best time turning 3 cards, best1 = best time turning 1 card
+let stats = load(STATS_KEY, { played: 0, won: 0, streak: 0, best: 0, best1: 0 });
+let drawChoice = load(DRAW_KEY, 3) === 1 ? 1 : 3;   // what the next deal uses
 let selected = null;   // the card she has picked up: { pile, c, i } or null
 let finishing = false; // true while Finish is playing the last cards
 
@@ -105,7 +109,7 @@ function pickDeal() {
 
 function newState() {
   const seed = pickDeal();
-  return { seed, ...dealCards(seed), moves: 0, elapsed: 0, undo: [], done: false };
+  return { seed, draw: drawChoice, ...dealCards(seed), moves: 0, elapsed: 0, undo: [], done: false };
 }
 
 function saveGame() {
@@ -236,8 +240,8 @@ function render() {
   // Deck (face down)
   state.stock.forEach((card, i) => place(show(card, false), x(0), 0, 10 + i));
 
-  // Turned-over cards: the top 3 are fanned out
-  const fanFrom = Math.max(0, state.waste.length - 3);
+  // Turned-over cards: the top 3 are fanned out (just the top 1 when turning 1 at a time)
+  const fanFrom = Math.max(0, state.waste.length - (state.draw === 1 ? 1 : 3));
   state.waste.forEach((card, i) => {
     const shift = i < fanFrom ? 0 : Math.round((i - fanFrom) * cw * 0.32);
     place(show(card, true), x(1) + shift, 0, 100 + i);
@@ -271,6 +275,16 @@ function render() {
   $("moves").textContent = `${state.moves} ${state.moves === 1 ? "move" : "moves"}`;
   // While Finish is playing the cards, the other buttons wait.
   $("undoBtn").disabled = state.done || finishing || state.undo.length === 0;
+  // The switch shows this game's setting. If the next deal will use the other
+  // one, that button gets a dashed outline marked "next deal".
+  $("turnPick").querySelectorAll("button").forEach((x) => {
+    const n = Number(x.dataset.n);
+    const now = n === state.draw;
+    const next = !now && n === drawChoice;
+    x.setAttribute("aria-pressed", now);
+    x.classList.toggle("next", next);
+    x.setAttribute("aria-label", `Turn ${n} card${n === 1 ? "" : "s"}${now ? " (this game)" : next ? " (next deal)" : ""}`);
+  });
   $("giveUpBtn").disabled = finishing;
   const canFinish = !state.done && !finishing && canAutoFinish(state) && totalOnFoundations(state) < 52;
   $("finishBtn").disabled = !canFinish;
@@ -397,7 +411,8 @@ function tapDeck() {
     say("The deck is empty");
     return;
   }
-  remember();
+  // Turning the deck isn't saved as its own Undo step: Undo takes back the last
+  // card that was moved (and the deck goes back to how it was at that moment).
   const restarting = state.stock.length === 0;
   drawCards(state);
   state.moves++;
@@ -612,10 +627,11 @@ function dropTarget(el) {
 // ---------- Undo ----------
 function undo() {
   if (state.done || finishing || !state.undo.length) return;
+  if (!Coins.spend(Coins.UNDO_COST, "undo")) return;   // an Undo costs a coin
   const before = JSON.parse(state.undo.pop());
   Object.assign(state, before);
   selected = null;
-  say("Took back the last move");
+  say("Took back your last move");
   render();
   saveGame();
 }
@@ -687,11 +703,13 @@ function finish(won, gaveUp = false) {
 
   stats.played++;
   let newBest = false;
+  const bestKey = state.draw === 1 ? "best1" : "best";   // separate best times for Turn 1 and Turn 3
+  const bestLabel = `Best (turn ${state.draw === 1 ? 1 : 3})`;
   if (won) {
     stats.won++;
     stats.streak++;
-    if (!stats.best || state.elapsed < stats.best) {
-      stats.best = state.elapsed;
+    if (!stats[bestKey] || state.elapsed < stats[bestKey]) {
+      stats[bestKey] = state.elapsed;
       newBest = true;
     }
   } else if (!gaveUp || GIVE_UP_ENDS_STREAK) {
@@ -710,7 +728,8 @@ function finish(won, gaveUp = false) {
     $("newBest").hidden = !newBest;
     $("sPlayed").textContent = stats.played;
     $("sWon").textContent = stats.won;
-    $("sBest").textContent = stats.best ? formatTime(stats.best) : "-";
+    $("sBest").textContent = stats[bestKey] ? formatTime(stats[bestKey]) : "-";
+    $("sBestLabel").textContent = bestLabel;
     $("endSheet").hidden = false;
     $("againBtn").focus();
   }, won ? 800 : 100);
@@ -747,6 +766,30 @@ $("helpBtn").onclick = () => { tick(); $("helpSheet").hidden = false; $("helpClo
 $("helpClose").onclick = () => { $("helpSheet").hidden = true; lastTick = Date.now(); save(SEEN_KEY, 1); };
 $("againBtn").onclick = newGame;
 
+// Turn 1 / Turn 3. Before the first move it changes this deal right away;
+// after that it's saved for the next deal.
+function chooseDraw(n) {
+  if (n !== 1 && n !== 3) return;
+  drawChoice = n;
+  save(DRAW_KEY, n);
+  if (state.done) {
+    say(`Next deal: turn ${n === 1 ? "1 card" : "3 cards"}`);
+  } else if (state.moves === 0) {
+    state.draw = n;
+    saveGame();
+    say(n === 1 ? "Turning over 1 card at a time" : "Turning over 3 cards at a time");
+  } else if (state.draw !== n) {
+    say(`Next deal: turn ${n === 1 ? "1 card" : "3 cards"}`);
+  } else {
+    say("");
+  }
+  render();
+}
+$("turnPick").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (b) chooseDraw(Number(b.dataset.n));
+});
+
 // Keep the cards sized to the screen (e.g. when the phone is turned).
 window.addEventListener("resize", () => render());
 
@@ -762,6 +805,7 @@ const savedOk = savedGame && !savedGame.done && Array.isArray(savedGame.tab) && 
 if (savedOk) {
   state = savedGame;      // pick up where she left off
   if (!Array.isArray(state.undo)) state.undo = [];
+  if (state.draw !== 1) state.draw = 3;   // games saved before Turn 1 existed turn 3
   lastTick = Date.now();
   say("Welcome back - here's your game");
   render();

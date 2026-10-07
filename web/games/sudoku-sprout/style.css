@@ -17,7 +17,7 @@
   --selected: #f5c49d;       /* the square you've picked: clay pot */
   --peer: #fbefe5;           /* same row, column or box */
   --same: #f6dcc7;           /* the same number elsewhere */
-  --note: #44514a;           /* small reminder numbers */
+  --note: #8c2f6e;           /* small reminder numbers (notes): plum, so they never look like placed numbers */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,7 +32,7 @@
     --selected: #6e4428;
     --peer: #2c2420;
     --same: #4c3527;
-    --note: #c0ccc4;
+    --note: #f0a8d8;
   }
 }
 

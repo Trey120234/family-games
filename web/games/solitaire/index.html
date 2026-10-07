@@ -52,6 +52,12 @@
     <!-- Timer and moves -->
     <div class="status-row">
       <span class="timer" id="timer" aria-label="Time">0:00</span>
+      <!-- How many cards the deck turns over each time: 1 (easier) or 3 -->
+      <div class="turn-pick" id="turnPick" role="group" aria-label="Cards turned over each time">
+        <span class="turn-label">Turn</span>
+        <button type="button" data-n="1" aria-pressed="false" aria-label="Turn 1 card">1</button>
+        <button type="button" data-n="3" aria-pressed="true" aria-label="Turn 3 cards">3</button>
+      </div>
       <span class="moves" id="moves">0 moves</span>
     </div>
 
@@ -65,7 +71,7 @@
 
     <!-- Undo / Finish -->
     <div class="controls">
-      <button class="ctrl" id="undoBtn" type="button">Undo</button>
+      <button class="ctrl" id="undoBtn" type="button" data-cost="undo">Undo</button>
       <button class="ctrl" id="finishBtn" type="button" disabled>Finish</button>
     </div>
   </div>
@@ -78,8 +84,9 @@
       <p><b>To move a card:</b> tap it (it lifts up with a gold edge), then tap where it should go. Tap it again to put it back down. You can also <b>drag</b> a card there with your finger.</p>
       <p><b>Shortcut:</b> double-tap a card to send it straight up to its pile at the top.</p>
       <p>In the 7 columns, a card can go on one that is <b>one higher</b> and the <b>other color</b>, like a red 6 on a black 7. Only a <b>King</b> can go in an empty column.</p>
-      <p>Tap the <b>deck</b> at the top left to turn over 3 new cards. Only the top one can be played. When the deck runs out, tap it to start it again.</p>
-      <p>Stuck? <b>Undo</b> takes back your last move. Every deal can be won.</p>
+      <p>Tap the <b>deck</b> at the top left to turn over new cards. Only the top one can be played. When the deck runs out, tap it to start it again.</p>
+      <p>Use <b>Turn 1</b> or <b>Turn 3</b> at the top to choose how many cards the deck turns over each time. Turning 1 is easier. Every deal can be won either way.</p>
+      <p>Stuck? <b>Undo</b> takes back your last move for 1 coin. Every deal can be won.</p>
       <p>Coins are shared by all the games. Tap the coin button at the top to see how many you have or add more.</p>
       <button class="big" id="helpClose" type="button">Let's play</button>
     </div>
@@ -104,7 +111,7 @@
       <div class="stats">
         <div><b id="sPlayed">0</b><span>Played</span></div>
         <div><b id="sWon">0</b><span>Won</span></div>
-        <div><b id="sBest">-</b><span>Best time</span></div>
+        <div><b id="sBest">-</b><span id="sBestLabel">Best time</span></div>
       </div>
       <button class="big" id="againBtn" type="button">Deal new cards</button>
     </div>

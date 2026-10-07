@@ -2,7 +2,8 @@
 //  Coins - one wallet shared by every game and the home screen.
 //
 //  - New players start with START_COINS.
-//  - A hint costs HINT_COST coins (games call Coins.spend).
+//  - A hint costs HINT_COST coins, and Undo in Solitaire costs UNDO_COST
+//    (games call Coins.spend).
 //  - The coin button at the top shows the balance and opens the
 //    "Add coins" panel.
 //
@@ -17,7 +18,15 @@ const Coins = (function () {
   // ---------- Settings you can change ----------
   const START_COINS = 5;          // what a brand-new player gets
   const HINT_COST = 1;            // what one hint costs
+  const UNDO_COST = 1;            // what one Undo costs (Solitaire)
   const ADD_PACKS = [5, 10, 25];  // the choices on the "Add coins" panel
+
+  // What each paid button costs, and how to describe it ("You need 1 coin for a hint")
+  const PRICES = {
+    hint: { cost: HINT_COST, words: "for a hint" },
+    undo: { cost: UNDO_COST, words: "to undo a move" },
+  };
+  const coinWord = (n) => (n === 1 ? "coin" : "coins");
 
   const KEY = "games-coins";      // where the balance is saved on the phone
   let memory = START_COINS;       // used if the phone won't let us save
@@ -97,15 +106,16 @@ const Coins = (function () {
     }
   }
 
-  // Puts a small "1 coin" price on buttons that cost coins, e.g. <button data-cost="hint">
+  // Puts a small "1 coin" price on buttons that cost coins, e.g. <button data-cost="hint"> or data-cost="undo"
   function markPrices() {
     document.querySelectorAll("[data-cost]").forEach((b) => {
       if (b.querySelector(".coin-cost")) return;
       const tag = document.createElement("span");
       tag.className = "coin-cost";
-      tag.innerHTML = COIN_SVG + HINT_COST;
+      const cost = (PRICES[b.dataset.cost] || PRICES.hint).cost;
+      tag.innerHTML = COIN_SVG + cost;
       b.appendChild(tag);
-      b.setAttribute("aria-label", `${b.textContent.replace(/\d+$/, "").trim()}, costs ${HINT_COST} coin${HINT_COST === 1 ? "" : "s"}`);
+      b.setAttribute("aria-label", `${b.textContent.replace(/\d+$/, "").trim()}, costs ${cost} ${coinWord(cost)}`);
     });
   }
 
@@ -142,7 +152,7 @@ const Coins = (function () {
       '  <h2 id="coinTitle">Coins</h2>' +
       '  <p class="coin-why" hidden></p>' +
       '  <p class="coin-balance">' + COIN_SVG + 'You have <b class="coin-have">0</b> <span class="coin-word">coins</span></p>' +
-      '  <p>A hint costs ' + HINT_COST + ' coin' + (HINT_COST === 1 ? "" : "s") + '. Coins work in every game.</p>' +
+      '  <p>A hint costs ' + HINT_COST + ' ' + coinWord(HINT_COST) + ', and so does Undo in Solitaire. Coins work in every game.</p>' +
       '  <div class="coin-packs">' +
       ADD_PACKS.map((n) => '<button type="button" class="coin-pack" data-n="' + n + '">' + COIN_SVG + '<b>+' + n + '</b><span>coins</span></button>').join("") +
       '  </div>' +
@@ -169,15 +179,15 @@ const Coins = (function () {
     sheet.querySelector("#coinTitle").textContent = "Coins";
   }
 
-  // why: "hint" when a hint was tapped without enough coins
+  // why: "hint" or "undo" when that button was tapped without enough coins
   function open(why) {
     if (!sheet) return;
     lastFocus = document.activeElement;
-    const short = why === "hint";
-    sheet.querySelector("#coinTitle").textContent = short ? "Out of coins" : "Coins";
+    const price = PRICES[why];
+    sheet.querySelector("#coinTitle").textContent = price ? "Out of coins" : "Coins";
     const whyLine = sheet.querySelector(".coin-why");
-    whyLine.hidden = !short;
-    whyLine.textContent = short ? `You need ${HINT_COST} coin${HINT_COST === 1 ? "" : "s"} for a hint. Add more below.` : "";
+    whyLine.hidden = !price;
+    whyLine.textContent = price ? `You need ${price.cost} ${coinWord(price.cost)} ${price.words}. Add more below.` : "";
     sheet.querySelector(".coin-status").textContent = "";
     show();
     sheet.hidden = false;
@@ -209,5 +219,5 @@ const Coins = (function () {
   window.addEventListener("pageshow", show);                  // coming back with the Back button
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") show(); });
 
-  return { get, add, spend, open, isOpen, HINT_COST };
+  return { get, add, spend, open, isOpen, HINT_COST, UNDO_COST };
 })();

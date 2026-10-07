@@ -1,7 +1,8 @@
 // =============================================================
 //  Solitaire - the deals.
 //  Each number is one shuffle of the cards. Every one of these was
-//  checked by computer and can be won (turning over 3 cards at a time).
+//  checked by computer and can be won turning over 3 cards at a time,
+//  and so also turning over 1 at a time (that was checked too).
 //  600 deals; the game avoids repeating a deal until half have been played.
 // =============================================================
 
